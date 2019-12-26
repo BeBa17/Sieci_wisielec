@@ -20,8 +20,8 @@ int epollFd;
 int servFd;
 
 std::unordered_set<Client*> clients;
-std::unordered_set<Player*> players;
-std::unordered_set<Queuer*> queuers;
+//std::unordered_set<Player*> players;
+//std::unordered_set<Queuer*> queuers;
 std::chrono::time_point<std::chrono::steady_clock> start;
 std::chrono::time_point<std::chrono::steady_clock> end;
 bool timeRun = false;
@@ -51,28 +51,9 @@ public:
     Client(int fd);
     Client();
     ~Client();
+    bool player;
     int fd() const {return _fd;}
     virtual void handleEvent(uint32_t events);
     void myWrite(char * buffer, int count);
     void remove();
-};
-
-class Player : public Client {
-    public:
-    int _fd;
-    Player(int fd);
-    int fd() const {return _fd;}
-    void myWrite(char * buffer, int count);
-    void remove();
-
-};
-
-class Queuer : public Client {
-    public:
-    int _fd;
-    Queuer(int fd);
-    int fd() const {return _fd;}
-    void myWrite(char * buffer, int count);
-    void remove();
-
 };

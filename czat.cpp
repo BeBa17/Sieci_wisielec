@@ -23,9 +23,11 @@ Client::Client(int fd) : _fd(fd) {
 
     if(registrationAvailable == true)
     {
-        players.insert(new Player(fd));}
+        this->player = true;
+        ::write(fd,"We'll start in a few seconds\n", sizeof("We'll start in a few seconds\n"));}
     else{
-        queuers.insert(new Queuer(fd));}
+        this->player = false;
+        ::write(fd,"Please wait for a next round\n", sizeof("Please wait for a next round\n"));}
 }
 Client::~Client(){
     epoll_ctl(epollFd, EPOLL_CTL_DEL, _fd, nullptr);
@@ -78,32 +80,6 @@ class : Handler {
         }
     }
 } servHandler;
-
-Player::Player(int fd)
-{
-    ::write(fd,"You're in game. Please wait\n", sizeof("You're in game. Please wait\n"));
-}
-void Player::remove() {
-    printf("removing %d\n", _fd);
-    players.erase(this);
-    delete this;
-}
-void Player::myWrite(char * buffer, int count){
-    ::write(_fd, buffer, count);
-}
-
-Queuer::Queuer(int fd){
-    ::write(fd,"Please wait for a next round\n", sizeof("Please wait for a next round\n"));
-}
-void Queuer::remove() {
-    printf("removing %d\n", _fd);
-    queuers.erase(this);
-    delete this;
-}
-void Queuer::myWrite(char * buffer, int count){
-    if(count != ::write(_fd, buffer, count))
-        remove();   
-}
 
 int main(int argc, char ** argv){
     if(argc != 2) error(1, 0, "Need 1 arg (port)");
@@ -172,14 +148,15 @@ void sendToAllCli(char * buffer){
 }
 
 void sendToAllPly(char * buffer){
-    auto it = players.begin();
-    while(it!=players.end()){
-        Player * player = *it;
+    auto it = clients.begin();
+    while(it!=clients.end()){
+        Client * client = *it;
         it++;
-        player->myWrite(buffer, sizeof(buffer));
+        if(client->player == true)
+            client->myWrite(buffer, sizeof(buffer));
     }
 }
-
+/*
 void sendToAllQue(char * buffer){
     auto it = queuers.begin();
     while(it!=queuers.end()){
@@ -187,4 +164,4 @@ void sendToAllQue(char * buffer){
         it++;
         queuer->myWrite(buffer, sizeof(buffer));
     }
-}
+}*/
