@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <signal.h>
 #include <chrono>
+#include <string>
 #include "czat.h"
 
 #define TIME_FOR_REGISTRATION 30
@@ -27,7 +28,10 @@ Client::Client(int fd) : _fd(fd) {
     if(registrationAvailable == true)
     {
         this->player = true;
-        ::write(fd,"We'll start in a few seconds\n", sizeof("We'll start in a few seconds\n"));}
+        end = std::chrono::steady_clock::now();
+        char duration[10];
+        sprintf(duration, "%ld", std::chrono::duration_cast<std::chrono::seconds>(end - start).count());
+        this->myWrite(duration, 2);}
     else{
         this->player = false;
         ::write(fd,"Please wait for a next round\n", sizeof("Please wait for a next round\n"));}
