@@ -29,11 +29,13 @@ bool registrationAvailable = true;
 
 void ctrl_c(int);
 
-void sendToAllPly(char * buffer);
+void sendToAllBut(int fd, char * buffer, int count);
 
-void sendToAllQue(char * buffer);
+void sendToAllPly(char * buffer, int count);
 
-void sendToAllCli(char * buffer);
+//void sendToAllQue(char * buffer);
+
+void sendToAllCli(char * buffer, int count);
 
 uint16_t readPort(char * txt);
 

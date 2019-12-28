@@ -40,9 +40,9 @@ Client::Client(){
 void Client::handleEvent(uint32_t events){
     if(events & EPOLLIN) {
         char buffer[256];
-        ssize_t count = read(_fd, buffer, sizeof(buffer));
+        ssize_t count = read(_fd, buffer, 256);
         if(count > 0)
-            sendToAllCli(buffer);
+            sendToAllBut(_fd, buffer, count);
         else
             events |= EPOLLERR;
     }
@@ -106,13 +106,13 @@ int main(int argc, char ** argv){
     epoll_ctl(epollFd, EPOLL_CTL_ADD, servFd, &ee);
 
     while(true){
-        if(-1 == epoll_wait(epollFd, &ee, 1, -1)) {
+        if(-1 == epoll_wait(epollFd, &ee, 5, -1)) {
             error(0,errno,"epoll_wait failed");
             ctrl_c(SIGINT);
         }
         ((Handler*)ee.data.ptr)->handleEvent(ee.events);
         end = std::chrono::steady_clock::now();
-        if (std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > 60 ) { registrationAvailable = false; sendToAllPly("START");}
+        if ((std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > 60) & (registrationAvailable == true) ) { registrationAvailable = false; sendToAllPly("start", 5);}
 
     }
 }
@@ -138,22 +138,32 @@ void ctrl_c(int){
     exit(0);
 }
 
-void sendToAllCli(char * buffer){
+void sendToAllBut(int fd, char * buffer, int count){
     auto it = clients.begin();
     while(it!=clients.end()){
         Client * client = *it;
         it++;
-        client->myWrite(buffer, sizeof(buffer));
+        if(client->fd()!=fd)
+            client->myWrite(buffer, count);
     }
 }
 
-void sendToAllPly(char * buffer){
+void sendToAllCli(char * buffer, int count){
+    auto it = clients.begin();
+    while(it!=clients.end()){
+        Client * client = *it;
+        it++;
+        client->myWrite(buffer, count);
+    }
+}
+
+void sendToAllPly(char * buffer, int count){
     auto it = clients.begin();
     while(it!=clients.end()){
         Client * client = *it;
         it++;
         if(client->player == true)
-            client->myWrite(buffer, sizeof(buffer));
+            client->myWrite(buffer, count);
     }
 }
 /*
