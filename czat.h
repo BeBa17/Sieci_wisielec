@@ -26,6 +26,7 @@ std::chrono::time_point<std::chrono::steady_clock> start;
 std::chrono::time_point<std::chrono::steady_clock> end;
 bool timeRun = false;
 bool registrationAvailable = true;
+bool gameRun = false;
 
 void ctrl_c(int);
 
@@ -33,7 +34,7 @@ void sendToAllBut(int fd, char * buffer, int count);
 
 void sendToAllPly(char * buffer, int count);
 
-//void sendToAllQue(char * buffer);
+void sendToAllQue(char * buffer, int count);
 
 void sendToAllCli(char * buffer, int count);
 

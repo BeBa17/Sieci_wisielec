@@ -13,6 +13,9 @@
 #include <chrono>
 #include "czat.h"
 
+#define TIME_FOR_REGISTRATION 30
+#define TIME_FOR_GAME 30
+
 Client::Client(int fd) : _fd(fd) {
     epoll_event ee {EPOLLIN|EPOLLRDHUP, {.ptr=this}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, _fd, &ee);
@@ -112,7 +115,11 @@ int main(int argc, char ** argv){
         }
         ((Handler*)ee.data.ptr)->handleEvent(ee.events);
         end = std::chrono::steady_clock::now();
-        if ((std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > 60) & (registrationAvailable == true) ) { registrationAvailable = false; sendToAllPly("start", 5);}
+        if ((std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > TIME_FOR_REGISTRATION) & (registrationAvailable == true) ) 
+        { registrationAvailable = false; sendToAllPly("start", 5);}
+
+        if ((std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > (TIME_FOR_REGISTRATION+TIME_FOR_GAME)) & (registrationAvailable == false) ) 
+        { registrationAvailable = true; sendToAllPly("the end", 7);}
 
     }
 }
@@ -166,12 +173,13 @@ void sendToAllPly(char * buffer, int count){
             client->myWrite(buffer, count);
     }
 }
-/*
-void sendToAllQue(char * buffer){
-    auto it = queuers.begin();
-    while(it!=queuers.end()){
-        Queuer * queuer = *it;
+
+void sendToAllQue(char * buffer, int count){
+    auto it = clients.begin();
+    while(it!=clients.end()){
+        Client * client = *it;
         it++;
-        queuer->myWrite(buffer, sizeof(buffer));
+        if(client->player == false)
+            client->myWrite(buffer, count);
     }
-}*/
+}
