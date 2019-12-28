@@ -12,6 +12,7 @@
 #include <signal.h>
 #include <chrono>
 #include <string>
+#include <thread>
 #include "czat.h"
 
 #define TIME_FOR_REGISTRATION 30
@@ -23,14 +24,16 @@ Client::Client(int fd) : _fd(fd) {
 
     ::write(fd,"Welcome\n", sizeof("Welcome\n"));
 
-    if(timeRun == false) { timeRun = true; start = std::chrono::steady_clock::now(); }
+    if(timeRun == false) { timeRun = true; }
 
     if(registrationAvailable == true)
     {
         this->player = true;
-        end = std::chrono::steady_clock::now();
+        
         char duration[10];
+        printf("check");
         sprintf(duration, "%ld", std::chrono::duration_cast<std::chrono::seconds>(end - start).count());
+        printf("ing");
         this->myWrite(duration, 2);}
     else{
         this->player = false;
@@ -112,19 +115,46 @@ int main(int argc, char ** argv){
     epoll_event ee {EPOLLIN, {.ptr=&servHandler}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, servFd, &ee);
 
+    std::thread clockR(clockRun, &start, &end, &registrationAvailable, &timeRun);
     while(true){
+        printf(".\n");
+        
         if(-1 == epoll_wait(epollFd, &ee, 5, -1)) {
             error(0,errno,"epoll_wait failed");
             ctrl_c(SIGINT);
+            printf("/\n");
         }
         ((Handler*)ee.data.ptr)->handleEvent(ee.events);
         end = std::chrono::steady_clock::now();
-        if ((std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > TIME_FOR_REGISTRATION) & (registrationAvailable == true) ) 
-        { registrationAvailable = false; sendToAllPly("start", 5);}
+        
 
-        if ((std::chrono::duration_cast<std::chrono::seconds>(end - start).count() > (TIME_FOR_REGISTRATION+TIME_FOR_GAME)) & (registrationAvailable == false) ) 
-        { registrationAvailable = true; sendToAllPly("the end", 7);}
+    }
+}
 
+void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun){
+    
+    bool afterStart = false;
+
+    while(!afterStart){
+        if(*timeRun == true)
+        {
+            *start = std::chrono::steady_clock::now();
+            afterStart = true;
+            break;
+        }
+        
+    }
+
+    while(true){
+
+        *end = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(*end - *start).count();
+        
+        if ((duration > TIME_FOR_REGISTRATION) & (*registrationAvailable == true) ) 
+            { *registrationAvailable = false; sendToAllPly("start", 5);}
+
+        if ((duration > (TIME_FOR_REGISTRATION+TIME_FOR_GAME)) & (*registrationAvailable == false) ) 
+            { *registrationAvailable = true; sendToAllPly("the end", 7);}
     }
 }
 

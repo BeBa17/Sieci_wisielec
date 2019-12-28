@@ -30,6 +30,8 @@ bool gameRun = false;
 
 void ctrl_c(int);
 
+void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun);
+
 void sendToAllBut(int fd, char * buffer, int count);
 
 void sendToAllPly(char * buffer, int count);
