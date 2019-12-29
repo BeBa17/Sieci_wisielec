@@ -16,6 +16,7 @@
 #include "czat.h"
 
 #define TIME_FOR_REGISTRATION 30
+#define TIME_GAP 5
 #define TIME_FOR_GAME 30
 
 Client::Client(int fd) : _fd(fd) {
@@ -115,7 +116,7 @@ int main(int argc, char ** argv){
     epoll_event ee {EPOLLIN, {.ptr=&servHandler}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, servFd, &ee);
 
-    std::thread clockR(clockRun, &start, &end, &registrationAvailable, &timeRun);
+    std::thread clockR(clockRun, &start, &end, &registrationAvailable, &timeRun, &gameRun);
     while(true){
         printf(".\n");
         
@@ -131,7 +132,7 @@ int main(int argc, char ** argv){
     }
 }
 
-void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun){
+void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun, bool * gameRun){
     
     bool afterStart = false;
 
@@ -151,11 +152,21 @@ void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::c
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(*end - *start).count();
         
         if ((duration > TIME_FOR_REGISTRATION) & (*registrationAvailable == true) ) 
-            { *registrationAvailable = false; sendToAllPly("start", 5);}
+            { *registrationAvailable = false; sendToAllPly(myStringToChar("koniec rejestracji"), 18);}
 
-        if ((duration > (TIME_FOR_REGISTRATION+TIME_FOR_GAME)) & (*registrationAvailable == false) ) 
-            { *registrationAvailable = true; sendToAllPly("the end", 7);}
+        if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP)) & (*gameRun == false) ) 
+            { *gameRun = true; sendToAllPly(myStringToChar("start"), 6); }
+
+        if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP + TIME_FOR_GAME)) & (*registrationAvailable == false ) & (*gameRun == true) ) 
+            { 
+                *registrationAvailable = true; *gameRun = false; sendToAllPly(myStringToChar("the end"), 7);
+                *start = std::chrono::steady_clock::now();
+            }
     }
+}
+
+char* myStringToChar(std::string str){
+    return &str[0];
 }
 
 uint16_t readPort(char * txt){

@@ -13,15 +13,11 @@
 #include <chrono>
 
 class Client;
-class Player;
-class Queuer;
 
 int epollFd;
 int servFd;
 
 std::unordered_set<Client*> clients;
-//std::unordered_set<Player*> players;
-//std::unordered_set<Queuer*> queuers;
 std::chrono::time_point<std::chrono::steady_clock> start;
 std::chrono::time_point<std::chrono::steady_clock> end;
 bool timeRun = false;
@@ -30,7 +26,7 @@ bool gameRun = false;
 
 void ctrl_c(int);
 
-void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun);
+void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun, bool * gameRun);
 
 void sendToAllBut(int fd, char * buffer, int count);
 
@@ -39,6 +35,8 @@ void sendToAllPly(char * buffer, int count);
 void sendToAllQue(char * buffer, int count);
 
 void sendToAllCli(char * buffer, int count);
+
+char* myStringToChar(std::string str);
 
 uint16_t readPort(char * txt);
 
@@ -58,7 +56,7 @@ public:
     ~Client();
     bool player;
     int fd() const {return _fd;}
-    virtual void handleEvent(uint32_t events);
+    void handleEvent(uint32_t events);
     void myWrite(char * buffer, int count);
     void remove();
 };
