@@ -32,9 +32,7 @@ Client::Client(int fd) : _fd(fd) {
         this->player = true;
         
         char duration[10];
-        printf("check");
         sprintf(duration, "%ld", std::chrono::duration_cast<std::chrono::seconds>(end - start).count());
-        printf("ing");
         this->myWrite(duration, 2);}
     else{
         this->player = false;
