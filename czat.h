@@ -38,6 +38,8 @@ void sendToAllCli(char * buffer, int count);
 
 char* myStringToChar(std::string str);
 
+void mySendInt(int numb);
+
 uint16_t readPort(char * txt);
 
 void setReuseAddr(int sock);

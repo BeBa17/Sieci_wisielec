@@ -150,7 +150,7 @@ void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::c
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(*end - *start).count();
         
         if ((duration > TIME_FOR_REGISTRATION) & (*registrationAvailable == true) ) 
-            { *registrationAvailable = false; sendToAllPly(myStringToChar("koniec rejestracji"), 18);}
+            { *registrationAvailable = false; mySendInt(TIME_GAP);}
 
         if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP)) & (*gameRun == false) ) 
             { *gameRun = true; sendToAllPly(myStringToChar("start"), 6); }
@@ -165,6 +165,12 @@ void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::c
 
 char* myStringToChar(std::string str){
     return &str[0];
+}
+
+void mySendInt(int numb){
+    char res[4];
+    sprintf(res, "%d", numb);
+    sendToAllPly(res, 4);
 }
 
 uint16_t readPort(char * txt){
