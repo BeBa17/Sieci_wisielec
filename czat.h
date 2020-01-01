@@ -10,7 +10,10 @@
 #include <sys/epoll.h>
 #include <unordered_set>
 #include <signal.h>
+#include <fstream>
 #include <chrono>
+
+#define NUMBER_OF_CLUES 35
 
 class Client;
 
@@ -20,9 +23,14 @@ int servFd;
 std::unordered_set<Client*> clients;
 std::chrono::time_point<std::chrono::steady_clock> start;
 std::chrono::time_point<std::chrono::steady_clock> end;
+std::fstream fileWithCodes;
 bool timeRun = false;
 bool registrationAvailable = true;
 bool gameRun = false;
+
+std::random_device dev;
+std::mt19937 rng(dev());
+std::uniform_int_distribution<std::mt19937::result_type> haslo(0,NUMBER_OF_CLUES);
 
 void ctrl_c(int);
 
@@ -44,6 +52,8 @@ uint16_t readPort(char * txt);
 
 void setReuseAddr(int sock);
 
+std::fstream& GotoLine(std::fstream& file, int num);
+
 struct Handler {
     virtual ~Handler(){}
     virtual void handleEvent(uint32_t events) = 0;
@@ -52,13 +62,16 @@ struct Handler {
 class Client {
     
 public:
+    static int numberOfPlayers;
     int _fd;
     Client(int fd);
     Client();
-    ~Client();
+    virtual ~Client();
     bool player;
     int fd() const {return _fd;}
-    void handleEvent(uint32_t events);
+    virtual void handleEvent(uint32_t events);
     void myWrite(char * buffer, int count);
     void remove();
 };
+
+int Client::numberOfPlayers = 0;

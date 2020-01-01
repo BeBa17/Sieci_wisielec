@@ -12,6 +12,10 @@
 #include <signal.h>
 #include <chrono>
 #include <string>
+#include <cstring>
+#include <limits>
+#include <random>
+#include <fstream>
 #include <thread>
 #include "czat.h"
 
@@ -23,22 +27,27 @@ Client::Client(int fd) : _fd(fd) {
     epoll_event ee {EPOLLIN|EPOLLRDHUP, {.ptr=this}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, _fd, &ee);
 
-    ::write(fd,"Welcome\n", sizeof("Welcome\n"));
+    ::write(fd,"Welcome\n", std::strlen("Welcome\n"));
 
     if(timeRun == false) { timeRun = true; }
 
     if(registrationAvailable == true)
     {
         this->player = true;
+        Client::numberOfPlayers++;
         
         char duration[10];
         sprintf(duration, "%ld", std::chrono::duration_cast<std::chrono::seconds>(end - start).count());
         this->myWrite(duration, 2);}
     else{
         this->player = false;
-        ::write(fd,"Please wait for a next round\n", sizeof("Please wait for a next round\n"));}
+        ::write(fd,"Please wait for a next round\n", std::strlen("Please wait for a next round\n"));}
 }
 Client::~Client(){
+    if(this->player==true)
+    {
+        Client::numberOfPlayers--;
+    }
     epoll_ctl(epollFd, EPOLL_CTL_DEL, _fd, nullptr);
     shutdown(_fd, SHUT_RDWR);
     close(_fd);
@@ -51,7 +60,7 @@ void Client::handleEvent(uint32_t events){
         char buffer[256];
         ssize_t count = read(_fd, buffer, 256);
         if(count > 0)
-            sendToAllBut(_fd, buffer, count);
+            ::write(_fd, buffer, count);
         else
             events |= EPOLLERR;
     }
@@ -114,14 +123,16 @@ int main(int argc, char ** argv){
     epoll_event ee {EPOLLIN, {.ptr=&servHandler}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, servFd, &ee);
 
+    fileWithCodes.open("hasla.txt");
+    if(!fileWithCodes){
+        error(1, errno, "Cannot open input file.\n");
+    }
+
     std::thread clockR(clockRun, &start, &end, &registrationAvailable, &timeRun, &gameRun);
     while(true){
-        printf(".\n");
-        
         if(-1 == epoll_wait(epollFd, &ee, 5, -1)) {
             error(0,errno,"epoll_wait failed");
             ctrl_c(SIGINT);
-            printf("/\n");
         }
         ((Handler*)ee.data.ptr)->handleEvent(ee.events);
         end = std::chrono::steady_clock::now();
@@ -149,15 +160,21 @@ void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::c
         *end = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(*end - *start).count();
         
+        std::string actualCode;
+
         if ((duration > TIME_FOR_REGISTRATION) & (*registrationAvailable == true) ) 
             { *registrationAvailable = false; mySendInt(TIME_GAP);}
 
         if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP)) & (*gameRun == false) ) 
-            { *gameRun = true; sendToAllPly(myStringToChar("start"), 6); }
+            { *gameRun = true; 
+            GotoLine(fileWithCodes, haslo(rng));
+            fileWithCodes >> actualCode;
+            sendToAllPly(myStringToChar(actualCode), actualCode.length()); 
+            mySendInt(Client::numberOfPlayers);}
 
         if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP + TIME_FOR_GAME)) & (*registrationAvailable == false ) & (*gameRun == true) ) 
             { 
-                *registrationAvailable = true; *gameRun = false; sendToAllPly(myStringToChar("the end"), 7);
+                *registrationAvailable = true; *gameRun = false; sendToAllPly(myStringToChar("the end"), std::strlen("the end"));
                 *start = std::chrono::steady_clock::now();
             }
     }
@@ -231,4 +248,12 @@ void sendToAllQue(char * buffer, int count){
         if(client->player == false)
             client->myWrite(buffer, count);
     }
+}
+
+std::fstream& GotoLine(std::fstream& file, int num){
+    file.seekg(std::ios::beg);
+    for(int i=0; i < num; i++){
+        file.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+    }
+    return file;
 }
