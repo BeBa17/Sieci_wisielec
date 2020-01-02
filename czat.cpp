@@ -64,13 +64,16 @@ void Client::handleEvent(uint32_t events){
         ssize_t count = read(_fd, buffer, 256);
         if(count > 0){
             std::string buff(buffer);
-            std::string odp(buff.substr(0,2));
+            std::string odp(buff.substr(0,1));
             std::cout<<odp;
             std::cout<<this->_fd;
-            if(odp == "00"){
-                printf("Przegrana");}
-                else
-                {printf("Wygrana");}
+            if(odp == "0"){
+                printf("Przegrana");
+                this->remove();
+                }
+            else if(odp == "1"){
+                printf("Wygrana");
+                }
             }
     }
     else
@@ -139,7 +142,8 @@ int main(int argc, char ** argv){
         error(1, errno, "Cannot open input file.\n");
     }
 
-    std::thread clockR(clockRun, &start, &end, &registrationAvailable, &timeRun, &gameRun);
+    std::thread clockR(clockRun, &start, &end, &registrationAvailable, &timeRun, &gameRun, &numberOfRound);
+    // Pętla przyjmująca nowe połączenia oraz, w trakcie gry, zczytująca wyniki rundy
     while(true){
         if(-1 == epoll_wait(epollFd, &ee, 5, -1)) {
             error(0,errno,"epoll_wait failed");
@@ -152,7 +156,7 @@ int main(int argc, char ** argv){
     }
 }
 
-void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun, bool * gameRun){
+void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun, bool * gameRun, int * numberOfRound){
     
     bool afterStart = false;
 
@@ -170,25 +174,43 @@ void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::c
 
         *end = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(*end - *start).count();
-        
-        std::string actualCode;
 
         if ((duration > TIME_FOR_REGISTRATION) & (*registrationAvailable == true) ) 
             { *registrationAvailable = false; mySendInt(TIME_GAP);}
 
         if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP)) & (*gameRun == false) ) 
-            { *gameRun = true; 
-            GotoLine(fileWithCodes, haslo(rng));
-            fileWithCodes >> actualCode;
-            sendToAllPly(myStringToChar(actualCode), actualCode.length()); 
-            mySendInt(Client::numberOfPlayers);}
+            { *gameRun = true;
+            sendClueToPlayers();
+            sendNumberOfPlayers();
+            }
 
         if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP + TIME_FOR_GAME)) & (*registrationAvailable == false ) & (*gameRun == true) ) 
             { 
                 *registrationAvailable = true; *gameRun = false; sendToAllPly(myStringToChar("the end"), std::strlen("the end"));
                 *start = std::chrono::steady_clock::now();
+                if(Client::numberOfPlayers > 1)
+                {*numberOfRound++;}
+                else
+                {*numberOfRound = 1;}
+                
+                
             }
+        if ((duration < TIME_FOR_REGISTRATION) & (*numberOfRound == 1)){
+            addQueuersToGame();
+        } 
     }
+}
+
+void sendNumberOfPlayers(){
+    mySendInt(Client::numberOfPlayers);
+}
+
+void sendClueToPlayers(){
+    std::string actualCode;
+
+    GotoLine(fileWithCodes, haslo(rng));
+    fileWithCodes >> actualCode;
+    sendToAllPly(myStringToChar(actualCode), actualCode.length()); 
 }
 
 char* myStringToChar(std::string str){
@@ -258,6 +280,22 @@ void sendToAllQue(char * buffer, int count){
         it++;
         if(client->player == false)
             client->myWrite(buffer, count);
+    }
+}
+
+void addQueuersToGame(){
+    auto it = clients.begin();
+    while(it!=clients.end()){
+        Client * client = *it;
+        it++;
+        if(client->player == false){
+            client->player = true;
+            Client::numberOfPlayers++;
+            char duration[10];
+            sprintf(duration, "%ld", std::chrono::duration_cast<std::chrono::seconds>(end - start).count());
+            client->myWrite(myStringToChar("Welcome in game\n"), 16);
+            client->myWrite(duration, 2);
+        }
     }
 }
 

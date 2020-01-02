@@ -27,6 +27,7 @@ std::fstream fileWithCodes;
 bool timeRun = false;
 bool registrationAvailable = true;
 bool gameRun = false;
+int numberOfRound = 1;
 
 std::random_device dev;
 std::mt19937 rng(dev());
@@ -34,7 +35,7 @@ std::uniform_int_distribution<std::mt19937::result_type> haslo(0,NUMBER_OF_CLUES
 
 void ctrl_c(int);
 
-void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun, bool * gameRun);
+void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun, bool * gameRun, int * numberOfRound);
 
 void sendToAllBut(int fd, char * buffer, int count);
 
@@ -44,9 +45,15 @@ void sendToAllQue(char * buffer, int count);
 
 void sendToAllCli(char * buffer, int count);
 
+void sendNumberOfPlayers();
+
+void sendClueToPlayers();
+
 char* myStringToChar(std::string str);
 
 void mySendInt(int numb);
+
+void addQueuersToGame();
 
 uint16_t readPort(char * txt);
 
