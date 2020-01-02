@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <cstdio>
+#include <iostream>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -56,14 +57,24 @@ Client::Client(){
     
 }
 void Client::handleEvent(uint32_t events){
+    if(gameRun == false)
+        return;
     if(events & EPOLLIN) {
         char buffer[256];
         ssize_t count = read(_fd, buffer, 256);
-        if(count > 0)
-            ::write(_fd, buffer, count);
-        else
-            events |= EPOLLERR;
+        if(count > 0){
+            std::string buff(buffer);
+            std::string odp(buff.substr(0,2));
+            std::cout<<odp;
+            std::cout<<this->_fd;
+            if(odp == "00"){
+                printf("Przegrana");}
+                else
+                {printf("Wygrana");}
+            }
     }
+    else
+        events |= EPOLLERR;
     if(events & ~EPOLLIN){
         remove();
     }
