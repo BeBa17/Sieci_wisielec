@@ -21,7 +21,7 @@
 #include "czat.h"
 
 #define TIME_FOR_REGISTRATION 30
-#define TIME_GAP 5
+#define TIME_GAP 10
 #define TIME_FOR_GAME 30
 
 Client::Client(int fd) : _fd(fd) {
@@ -39,7 +39,7 @@ Client::Client(int fd) : _fd(fd) {
         
         char duration[10];
         sprintf(duration, "%ld", std::chrono::duration_cast<std::chrono::seconds>(end - start).count());
-        this->myWrite(duration, 2);}
+        this->myWrite(duration, 1);}
     else{
         this->player = false;
         ::write(fd,"Please wait for a next round\n", std::strlen("Please wait for a next round\n"));}
@@ -186,7 +186,7 @@ void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::c
 
         if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP + TIME_FOR_GAME)) & (*registrationAvailable == false ) & (*gameRun == true) ) 
             { 
-                *registrationAvailable = true; *gameRun = false; sendToAllPly(myStringToChar("the end"), std::strlen("the end"));
+                *registrationAvailable = true; *gameRun = false; sendToAllPly(myStringToChar("the end\n"), std::strlen("the end\n"));
                 *start = std::chrono::steady_clock::now();
                 if(Client::numberOfPlayers > 1)
                 {*numberOfRound++;}
@@ -210,7 +210,9 @@ void sendClueToPlayers(){
 
     GotoLine(fileWithCodes, haslo(rng));
     fileWithCodes >> actualCode;
-    sendToAllPly(myStringToChar(actualCode), actualCode.length()); 
+    sendToAllPly(myStringToChar(actualCode), actualCode.length());
+    char endline = '\n';
+    sendToAllPly(&endline, 1); 
 }
 
 char* myStringToChar(std::string str){
@@ -218,9 +220,10 @@ char* myStringToChar(std::string str){
 }
 
 void mySendInt(int numb){
-    char res[4];
+    char res[2];
     sprintf(res, "%d", numb);
-    sendToAllPly(res, 4);
+    res[1] = '\n';
+    sendToAllPly(res, 2);
 }
 
 uint16_t readPort(char * txt){
@@ -294,7 +297,7 @@ void addQueuersToGame(){
             char duration[10];
             sprintf(duration, "%ld", std::chrono::duration_cast<std::chrono::seconds>(end - start).count());
             client->myWrite(myStringToChar("Welcome in game\n"), 16);
-            client->myWrite(duration, 2);
+            client->myWrite(duration, 1);
         }
     }
 }
