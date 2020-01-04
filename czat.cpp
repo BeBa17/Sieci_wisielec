@@ -20,15 +20,15 @@
 #include <thread>
 #include "czat.h"
 
-#define TIME_FOR_REGISTRATION 30
+#define TIME_FOR_REGISTRATION 60
 #define TIME_GAP 10
-#define TIME_FOR_GAME 30
+#define TIME_FOR_GAME 10
 
 Client::Client(int fd) : _fd(fd) {
     epoll_event ee {EPOLLIN|EPOLLRDHUP, {.ptr=this}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, _fd, &ee);
 
-    ::write(fd,"Welcome\n", std::strlen("Welcome\n"));
+    ::write(fd,"welcome\n", std::strlen("welcome\n"));
 
     if(timeRun == false) { timeRun = true; }
 
@@ -37,12 +37,25 @@ Client::Client(int fd) : _fd(fd) {
         this->player = true;
         Client::numberOfPlayers++;
         
-        char duration[10];
-        sprintf(duration, "%ld", std::chrono::duration_cast<std::chrono::seconds>(end - start).count());
-        this->myWrite(duration, 1);}
-    else{
+        char duration[4];
+        long int dur = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+        sprintf(duration, "%ld", dur);
+        if (dur < 10)
+        {
+            duration[1] = '\n';
+            this->myWrite(duration, 2);
+            return;
+        }
+        if (dur < 100) {
+            duration[2] = '\n';
+            this->myWrite(duration, 3);
+            return;
+        }
+        duration[3] = '\n';
+        this->myWrite(duration, 4);
+    } else {
         this->player = false;
-        ::write(fd,"Please wait for a next round\n", std::strlen("Please wait for a next round\n"));}
+        ::write(fd,"wait\n", std::strlen("wait\n"));}
 }
 Client::~Client(){
     if(this->player==true)
@@ -186,7 +199,7 @@ void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::c
 
         if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP + TIME_FOR_GAME)) & (*registrationAvailable == false ) & (*gameRun == true) ) 
             { 
-                *registrationAvailable = true; *gameRun = false; sendToAllPly(myStringToChar("the end\n"), std::strlen("the end\n"));
+                *registrationAvailable = true; *gameRun = false; sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
                 *start = std::chrono::steady_clock::now();
                 if(Client::numberOfPlayers > 1)
                 {*numberOfRound++;}
@@ -220,10 +233,16 @@ char* myStringToChar(std::string str){
 }
 
 void mySendInt(int numb){
-    char res[2];
+    char res[3];
     sprintf(res, "%d", numb);
-    res[1] = '\n';
-    sendToAllPly(res, 2);
+    if (numb >= 10)
+    {
+        res[2] = '\n';
+        sendToAllPly(res, 3);
+    } else {
+        res[1] = '\n';
+        sendToAllPly(res, 2);
+    }
 }
 
 uint16_t readPort(char * txt){
@@ -294,10 +313,23 @@ void addQueuersToGame(){
         if(client->player == false){
             client->player = true;
             Client::numberOfPlayers++;
-            char duration[10];
-            sprintf(duration, "%ld", std::chrono::duration_cast<std::chrono::seconds>(end - start).count());
-            client->myWrite(myStringToChar("Welcome in game\n"), 16);
-            client->myWrite(duration, 1);
+            client->myWrite(myStringToChar("welcome\n"), 8);
+            char duration[4];
+            long int dur = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+            sprintf(duration, "%ld", dur);
+            if (dur < 10)
+            {
+                duration[1] = '\n';
+                client->myWrite(duration, 2);
+                return;
+            }
+            if (dur < 100) {
+                duration[2] = '\n';
+                client->myWrite(duration, 3);
+                return;
+            }
+            duration[3] = '\n';
+            client->myWrite(duration, 4);
         }
     }
 }
