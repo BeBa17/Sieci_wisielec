@@ -30,7 +30,7 @@ Client::Client(int fd) : _fd(fd) {
 
     ::write(fd,"welcome\n", std::strlen("welcome\n"));
 
-    if(timeRun == false) { timeRun = true; }
+    timeRun = true;
 
     if(registrationAvailable == true)
     {
@@ -39,20 +39,8 @@ Client::Client(int fd) : _fd(fd) {
         
         char duration[4];
         long int dur = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
-        sprintf(duration, "%ld", dur);
-        if (dur < 10)
-        {
-            duration[1] = '\n';
-            this->myWrite(duration, 2);
-            return;
-        }
-        if (dur < 100) {
-            duration[2] = '\n';
-            this->myWrite(duration, 3);
-            return;
-        }
-        duration[3] = '\n';
-        this->myWrite(duration, 4);
+        int length = sprintf(duration, "%ld\n", dur);
+        this->myWrite(duration, length);
     } else {
         this->player = false;
         ::write(fd,"wait\n", std::strlen("wait\n"));}
@@ -158,7 +146,7 @@ int main(int argc, char ** argv){
     std::thread clockR(clockRun, &start, &end, &registrationAvailable, &timeRun, &gameRun, &numberOfRound);
     // Pętla przyjmująca nowe połączenia oraz, w trakcie gry, zczytująca wyniki rundy
     while(true){
-        if(-1 == epoll_wait(epollFd, &ee, 5, -1)) {
+        if(-1 == epoll_wait(epollFd, &ee, 1, -1)) {
             error(0,errno,"epoll_wait failed");
             ctrl_c(SIGINT);
         }
