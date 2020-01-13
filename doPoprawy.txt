@@ -1,0 +1,44 @@
+
+serwer:
+
+    git rev: f3854b8d57047bce94f0a74cb4cf350f72106cc0
+    cppcheck pokazuje błędy
+    scan-build znajduje m. inn. "warning: Use of memory after it is freed"
+    [!] brak plików systemu budowania
+    nie należy umieszczać na repozytorium wyników budowania (binarki)
+    [!] całkowity brak synchronizacji między wątkami
+    sieciowo: architektura ok; wysyłanie wygląda ok poza brakiem obsługi błędów z write; odbieranie jest dla mnie niezrozumiałe.
+    widzę że jeszcze brakuje części rzeczy które są w opisie projektu
+    proszę zwrócić uwagę na to, że w wymaganiach jest fragment "w interaktywnych projektach (edytor grafiki, gra) klienci mają widzieć co się dzieje (np. ktoś przesuwa figurę na rysunku, inny gracz oddał głos na ruch)," - jest to brane pod uwagę przy ocenianiu projektu
+    [.] TIME_FOR_REGISTRATION, TIME_GAP, TIME_FOR_GAME powinny trafić do pliku konfiguracyjnego
+    [!] NUMBER_OF_CLUES - czy to jest wpisana na stałe w kod liczba linii w pliku z hasłami(!?) Zdecydowanie tak nie powinno to wyglądać; albo wczytujecie plik do RAMu (jeśli jest mały), albo korzystacie z bazy danych (jeśli jest za duży żeby go trzymać w RAMie). W tej formie prosicie się o problemy.
+    [?] l158: przekazujecie jako argumenty do jednokrotnie wołanej funkcji wskaźniki na zmienne globalne
+    [!] l161: błędne argumenty do epoll; nadpiszecie sobie stos
+    [!] Wasz program działa przez przypadek - w l165 rzutujecie ee.data.ptr na Handler*, a tam czasami jest wskaźnik na klasę Client, która nie dziedziczy po Handler.
+    [.?] l33 - nie można po prostu timeRun = true;?
+    [.] l42-l55 a nie prościej:
+
+    int length = sprintf(duration, "%ld\n", dur);
+    this->myWrite(duration, length);
+
+    [.] ten sprintf zrobi Wam buffer overflow jeśli upłynie za długi czas
+    [?] po co Wam Client::Client(); (poza tym, że wypadałoby napisać że jest default zamiast dawać puste wąsy)
+    [!] l74 - jeśli to wystąpi, będziecie się pętlić na epollu
+    [?] odbieracie do 256 znaków i ignorujecie większość tego co odebraliście? Zakładam że to WIP i że prawidłowa obsługa komunikatów pojawi się później.
+    [!] l176: aktywne czekanie; powinniście użyć condition_variable
+    [!] l186: kolejna pętla zjadająca 100% CPU
+    gdzie jest ustawiana początkowa wartość Client::numberOfPlayers?
+    [!] l205: kolejność operatorów - *numberOfRound++; to to samo co *(numberOfRound++); a nie (*numberOfRound)++
+    gra powinna się kończyć jak tylko Client::numberOfPlayers == 1, a nie upływie stałego czasu
+
+klient:
+
+    git rev: 6b3d3445e8fe6f7a5f584e804565ce0de65e2bc0
+    [!] brak plików systemu budowania
+    [?] na razie widzę klienta z CLI?
+    na razie klient jeszcze nic do serwera nie wysyła
+    [!] adres IP i port na stałe w kodzie
+    //TODO co robi klient i serwer kiedy jest jeden gracz? - proszę zajrzeć do swojego opisu projektu
+    //TODO jak zignorować dane z InputStreamu, które były tam napisane wcześniej- może tak: System.in.skip(System.in.available());
+    [!] na razie odpowiedź możecie wysłać nie do tej rund co trzeba - serwer nie usuwa klientów którzy nie wysłali odpowiedzi, a do tego klient nie sprawdza czy trwa jeszcze runda z której słowo jest zgadywane.
+
