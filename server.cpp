@@ -18,7 +18,7 @@
 #include <random>
 #include <fstream>
 #include <thread>
-#include "czat.h"
+#include "server.h"
 
 #define TIME_FOR_REGISTRATION 60
 #define TIME_GAP 10
@@ -202,7 +202,7 @@ void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::c
                 *registrationAvailable = true; *gameRun = false; sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
                 *start = std::chrono::steady_clock::now();
                 if(Client::numberOfPlayers > 1)
-                {*numberOfRound++;}
+                {(*numberOfRound)++;}
                 else
                 {*numberOfRound = 1;}
                 

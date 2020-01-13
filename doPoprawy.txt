@@ -6,7 +6,6 @@ serwer:
     scan-build znajduje m. inn. "warning: Use of memory after it is freed"
 
     [!] brak plików systemu budowania
-    nie należy umieszczać na repozytorium wyników budowania (binarki)
     [!] całkowity brak synchronizacji między wątkami
     sieciowo: architektura ok; wysyłanie wygląda ok poza brakiem obsługi błędów z write; odbieranie jest dla mnie niezrozumiałe.
     widzę że jeszcze brakuje części rzeczy które są w opisie projektu
@@ -29,7 +28,6 @@ serwer:
     [!] l176: aktywne czekanie; powinniście użyć condition_variable
     [!] l186: kolejna pętla zjadająca 100% CPU
     gdzie jest ustawiana początkowa wartość Client::numberOfPlayers?
-    [!] l205: kolejność operatorów - *numberOfRound++; to to samo co *(numberOfRound++); a nie (*numberOfRound)++
     gra powinna się kończyć jak tylko Client::numberOfPlayers == 1, a nie upływie stałego czasu
 
 klient:
