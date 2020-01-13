@@ -4,6 +4,7 @@ serwer:
     git rev: f3854b8d57047bce94f0a74cb4cf350f72106cc0
     cppcheck pokazuje błędy
     scan-build znajduje m. inn. "warning: Use of memory after it is freed"
+
     [!] brak plików systemu budowania
     nie należy umieszczać na repozytorium wyników budowania (binarki)
     [!] całkowity brak synchronizacji między wątkami
