@@ -13,7 +13,6 @@
 #include <fstream>
 #include <chrono>
 
-#define NUMBER_OF_CLUES 35
 
 class Client;
 
@@ -28,10 +27,12 @@ bool timeRun = false;
 bool registrationAvailable = true;
 bool gameRun = false;
 int numberOfRound = 1;
+int numberOfPlayers = 0;
+int numberOfClues = 0;
 
 std::random_device dev;
 std::mt19937 rng(dev());
-std::uniform_int_distribution<std::mt19937::result_type> haslo(0,NUMBER_OF_CLUES);
+std::uniform_int_distribution<std::mt19937::result_type> haslo(0,numberOfClues);
 
 void ctrl_c(int);
 

@@ -11,16 +11,13 @@ serwer:
     widzę że jeszcze brakuje części rzeczy które są w opisie projektu
     proszę zwrócić uwagę na to, że w wymaganiach jest fragment "w interaktywnych projektach (edytor grafiki, gra) klienci mają widzieć co się dzieje (np. ktoś przesuwa figurę na rysunku, inny gracz oddał głos na ruch)," - jest to brane pod uwagę przy ocenianiu projektu
     [.] TIME_FOR_REGISTRATION, TIME_GAP, TIME_FOR_GAME powinny trafić do pliku konfiguracyjnego
-    [!] NUMBER_OF_CLUES - czy to jest wpisana na stałe w kod liczba linii w pliku z hasłami(!?) Zdecydowanie tak nie powinno to wyglądać; albo wczytujecie plik do RAMu (jeśli jest mały), albo korzystacie z bazy danych (jeśli jest za duży żeby go trzymać w RAMie). W tej formie prosicie się o problemy.
     [?] l146: przekazujecie jako argumenty do jednokrotnie wołanej funkcji wskaźniki na zmienne globalne
-    [!] Wasz program działa przez przypadek - w l165 rzutujecie ee.data.ptr na Handler*, a tam czasami jest wskaźnik na klasę Client, która nie dziedziczy po Handler.
+    [!] Wasz program działa przez przypadek - w l153 rzutujecie ee.data.ptr na Handler*, a tam czasami jest wskaźnik na klasę Client, która nie dziedziczy po Handler.
     [.] ten sprintf zrobi Wam buffer overflow jeśli upłynie za długi czas (linijki 42, 43)
-    [?] po co Wam Client::Client(); (poza tym, że wypadałoby napisać że jest default zamiast dawać puste wąsy)
     [!] l62 - jeśli to wystąpi, będziecie się pętlić na epollu
     [?] odbieracie do 256 znaków i ignorujecie większość tego co odebraliście? Zakładam że to WIP i że prawidłowa obsługa komunikatów pojawi się później.
     [!] l164: aktywne czekanie; powinniście użyć condition_variable
     [!] l174: kolejna pętla zjadająca 100% CPU
-    gdzie jest ustawiana początkowa wartość Client::numberOfPlayers?
     gra powinna się kończyć jak tylko Client::numberOfPlayers == 1, a nie upływie stałego czasu
 
 

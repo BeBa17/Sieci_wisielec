@@ -54,9 +54,6 @@ Client::~Client(){
     shutdown(_fd, SHUT_RDWR);
     close(_fd);
 }
-Client::Client(){
-    
-}
 void Client::handleEvent(uint32_t events){
     if(gameRun == false)
         return;
@@ -138,10 +135,13 @@ int main(int argc, char ** argv){
     epoll_event ee {EPOLLIN, {.ptr=&servHandler}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, servFd, &ee);
 
+    std::string line;
     fileWithCodes.open("hasla.txt");
     if(!fileWithCodes){
         error(1, errno, "Cannot open input file.\n");
     }
+    while(getline(fileWithCodes, line))
+        numberOfClues++;
 
     std::thread clockR(clockRun, &start, &end, &registrationAvailable, &timeRun, &gameRun, &numberOfRound);
     // Pętla przyjmująca nowe połączenia oraz, w trakcie gry, zczytująca wyniki rundy
