@@ -58,19 +58,19 @@ void Client::handleEvent(uint32_t events){
     if(gameRun == false)
         return;
     if(events & EPOLLIN) {
-        char buffer[256];
-        ssize_t count = read(_fd, buffer, 256);
+        char buffer[2];
+        ssize_t count = read(_fd, buffer, 2);
         if(count > 0){
             std::string buff(buffer);
             std::string odp(buff.substr(0,1));
             std::cout<<odp;
             std::cout<<this->_fd;
-            if(odp == "0"){
+            if(odp == "-1"){
                 printf("Przegrana");
                 this->remove();
                 }
-            else if(odp == "1"){
-                printf("Wygrana");
+            else {
+                printf("Znakow %s", odp);
                 }
             }
     }

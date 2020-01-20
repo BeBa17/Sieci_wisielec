@@ -14,10 +14,30 @@
 #include <chrono>
 
 
-class Client;
-
 int epollFd;
 int servFd;
+
+struct Handler {
+    virtual ~Handler(){}
+    virtual void handleEvent(uint32_t events) = 0;
+};
+
+class Client : public Handler {
+    
+public:
+    static int numberOfPlayers;
+    int _fd;
+    Client(int fd);
+    Client();
+    virtual ~Client();
+    bool player;
+    int fd() const {return _fd;}
+    virtual void handleEvent(uint32_t events);
+    void myWrite(char * buffer, int count);
+    void remove();
+};
+
+int Client::numberOfPlayers = 0;
 
 std::unordered_set<Client*> clients;
 std::chrono::time_point<std::chrono::steady_clock> start;
@@ -62,24 +82,5 @@ void setReuseAddr(int sock);
 
 std::fstream& GotoLine(std::fstream& file, int num);
 
-struct Handler {
-    virtual ~Handler(){}
-    virtual void handleEvent(uint32_t events) = 0;
-};
 
-class Client {
-    
-public:
-    static int numberOfPlayers;
-    int _fd;
-    Client(int fd);
-    Client();
-    virtual ~Client();
-    bool player;
-    int fd() const {return _fd;}
-    virtual void handleEvent(uint32_t events);
-    void myWrite(char * buffer, int count);
-    void remove();
-};
 
-int Client::numberOfPlayers = 0;
