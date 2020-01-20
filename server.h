@@ -56,7 +56,7 @@ std::uniform_int_distribution<std::mt19937::result_type> haslo(0,numberOfClues);
 
 void ctrl_c(int);
 
-void clockRun(std::chrono::time_point<std::chrono::steady_clock> * start, std::chrono::time_point<std::chrono::steady_clock> * end, bool * registrationAvailable, bool * timeRun, bool * gameRun, int * numberOfRound);
+void clockRun();
 
 void sendToAllBut(int fd, char * buffer, int count);
 
