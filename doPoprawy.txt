@@ -11,7 +11,6 @@ serwer:
     [] brakuje części rzeczy które są w opisie projektu
     [.] TIME_FOR_REGISTRATION, TIME_GAP, TIME_FOR_GAME powinny trafić do pliku konfiguracyjnego
     [!] l62 - jeśli to wystąpi, będziecie się pętlić na epollu
-    [!] l164: aktywne czekanie; powinniście użyć condition_variable
     [!] l174: kolejna pętla zjadająca 100% CPU
     [] gra powinna się kończyć jak tylko Client::numberOfPlayers == 1, a nie upływie stałego czasu
 

@@ -158,15 +158,12 @@ int main(int argc, char ** argv){
 }
 
 void clockRun(){
-    
-    bool afterStart = false;
 
-    while(!afterStart){
+    if(afterStart == false){
         if(timeRun == true)
         {
             start = std::chrono::steady_clock::now();
             afterStart = true;
-            break;
         }
         
     }
