@@ -70,7 +70,7 @@ void Client::handleEvent(uint32_t events){
                 this->remove();
                 }
             else {
-                printf("Znakow %s", odp);
+                printf("Znakow %s", myStringToChar(odp));
                 }
             }
     }

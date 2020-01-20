@@ -6,15 +6,13 @@ serwer:
     scan-build znajduje m. inn. "warning: Use of memory after it is freed"
 
     [!] brak plików systemu budowania
-    [!] całkowity brak synchronizacji między wątkami
-    sieciowo: architektura ok; wysyłanie wygląda ok poza brakiem obsługi błędów z write; odbieranie jest dla mnie niezrozumiałe.
-    widzę że jeszcze brakuje części rzeczy które są w opisie projektu
-    proszę zwrócić uwagę na to, że w wymaganiach jest fragment "w interaktywnych projektach (edytor grafiki, gra) klienci mają widzieć co się dzieje (np. ktoś przesuwa figurę na rysunku, inny gracz oddał głos na ruch)," - jest to brane pod uwagę przy ocenianiu projektu
+    [!] całkowity brak synchronizacji między wątkami - id gracza + ilość pkt
+    [] brak obsługi błędów z write.
+    [] brakuje części rzeczy które są w opisie projektu
     [.] TIME_FOR_REGISTRATION, TIME_GAP, TIME_FOR_GAME powinny trafić do pliku konfiguracyjnego
     [!] l62 - jeśli to wystąpi, będziecie się pętlić na epollu
-    [?] odbieracie do 256 znaków i ignorujecie większość tego co odebraliście? Zakładam że to WIP i że prawidłowa obsługa komunikatów pojawi się później.
     [!] l164: aktywne czekanie; powinniście użyć condition_variable
     [!] l174: kolejna pętla zjadająca 100% CPU
-    gra powinna się kończyć jak tylko Client::numberOfPlayers == 1, a nie upływie stałego czasu
+    [] gra powinna się kończyć jak tylko Client::numberOfPlayers == 1, a nie upływie stałego czasu
 
 
