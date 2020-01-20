@@ -11,7 +11,6 @@ serwer:
     widzę że jeszcze brakuje części rzeczy które są w opisie projektu
     proszę zwrócić uwagę na to, że w wymaganiach jest fragment "w interaktywnych projektach (edytor grafiki, gra) klienci mają widzieć co się dzieje (np. ktoś przesuwa figurę na rysunku, inny gracz oddał głos na ruch)," - jest to brane pod uwagę przy ocenianiu projektu
     [.] TIME_FOR_REGISTRATION, TIME_GAP, TIME_FOR_GAME powinny trafić do pliku konfiguracyjnego
-    [.] ten sprintf zrobi Wam buffer overflow jeśli upłynie za długi czas (linijki 42, 43)
     [!] l62 - jeśli to wystąpi, będziecie się pętlić na epollu
     [?] odbieracie do 256 znaków i ignorujecie większość tego co odebraliście? Zakładam że to WIP i że prawidłowa obsługa komunikatów pojawi się później.
     [!] l164: aktywne czekanie; powinniście użyć condition_variable

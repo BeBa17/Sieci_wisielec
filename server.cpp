@@ -39,7 +39,7 @@ Client::Client(int fd) : _fd(fd) {
         
         char duration[4];
         long int dur = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
-        int length = sprintf(duration, "%ld\n", dur);
+        int length = sprintf(duration, "%ld\n", dur%10000);
         this->myWrite(duration, length);
     } else {
         this->player = false;
