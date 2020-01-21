@@ -183,7 +183,7 @@ void clockRunRegistration(){
 void clockRunGap(){
     registrationAvailable = false; mySendInt(TIME_GAP);
     printf("synchronizacja\n");
-    std::this_thread::sleep_for(std::chrono::seconds(TIME_FOR_REGISTRATION + TIME_GAP));
+    std::this_thread::sleep_for(std::chrono::seconds(TIME_GAP));
     clockRunGame();
 
 }
