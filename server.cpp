@@ -78,11 +78,6 @@ void Client::handleEvent(uint32_t events){
                 }
             }
     }
-    else
-        events |= EPOLLERR;
-    if(events & ~EPOLLIN){
-        remove();
-    }
 }
 void Client::myWrite(char * buffer, int count){
     if(count != ::write(_fd, buffer, count))
@@ -182,6 +177,7 @@ void clockRunRegistration(){
 
 void clockRunGap(){
     registrationAvailable = false; mySendInt(TIME_GAP);
+    endOfRound = false;
     printf("synchronizacja\n");
     std::this_thread::sleep_for(std::chrono::seconds(TIME_GAP));
     clockRunGame();
@@ -196,22 +192,24 @@ void clockRunGame(){
     
 
     // nowa runda
-/*
-    if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP + TIME_FOR_GAME)) & (registrationAvailable == false ) & (gameRun == true) ) { 
+
+    if (endOfRound == true) { 
     registrationAvailable = true; gameRun = false; sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
     start = std::chrono::steady_clock::now();
-    if(Client::numberOfPlayers > 1)
-    {(numberOfRound)++;}
-    else
-    {numberOfRound = 1;}
+    if(Client::numberOfPlayers > 1){
+        (numberOfRound)++;
+        }
+    else{
+        numberOfRound = 1;
+        addQueuersToGame();
+        clockRunRegistration();
+    }
     }
 
     // nowa gra
 
-    if ((duration < TIME_FOR_REGISTRATION) & (numberOfRound == 1)){
-        addQueuersToGame();
-    }
-*/
+    
+
 
 }
 
@@ -307,7 +305,6 @@ void addQueuersToGame(){
         if(client->player == false){
             client->player = true;
             Client::numberOfPlayers++;
-            client->myWrite(myStringToChar("welcome\n"), 8);
             char duration[4];
             long int dur = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
             int length = sprintf(duration, "%ld\n", dur);

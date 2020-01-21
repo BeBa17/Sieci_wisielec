@@ -47,6 +47,7 @@ std::chrono::time_point<std::chrono::steady_clock> start;
 std::chrono::time_point<std::chrono::steady_clock> end;
 std::fstream fileWithCodes;
 bool afterStart = false;
+bool endOfRound = true;
 bool timeRun = false;
 bool registrationAvailable = true;
 bool gameRun = false;
