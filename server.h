@@ -46,6 +46,7 @@ std::unordered_set<Client*> clients;
 std::chrono::time_point<std::chrono::steady_clock> start;
 std::chrono::time_point<std::chrono::steady_clock> end;
 std::fstream fileWithCodes;
+bool afterStart = false;
 bool timeRun = false;
 bool registrationAvailable = true;
 bool gameRun = false;
@@ -59,7 +60,13 @@ std::uniform_int_distribution<std::mt19937::result_type> haslo(0,numberOfClues);
 
 void ctrl_c(int);
 
-void clockRun();
+void clockRunStart();
+
+void clockRunRegistration();
+
+void clockRunGap();
+
+void clockRunGame();
 
 void sendToAllBut(int fd, char * buffer, int count);
 

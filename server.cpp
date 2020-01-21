@@ -30,6 +30,10 @@ Client::Client(int fd) : _fd(fd) {
 
     ::write(fd,"welcome\n", std::strlen("welcome\n"));
 
+    if(afterStart == false){
+        clockRunStart();
+    }
+
     timeRun = true;
 
     if(registrationAvailable == true)
@@ -143,7 +147,7 @@ int main(int argc, char ** argv){
     while(getline(fileWithCodes, line))
         numberOfClues++;
 
-    std::thread clockR(clockRun);
+    std::thread clockR(clockRunRegistration);
     // Pętla przyjmująca nowe połączenia oraz, w trakcie gry, zczytująca wyniki rundy
     while(true){
         if(-1 == epoll_wait(epollFd, &ee, 1, -1)) {
@@ -157,49 +161,58 @@ int main(int argc, char ** argv){
     }
 }
 
-void clockRun(){
+void clockRunStart(){
     
-    bool afterStart = false;
+    start = std::chrono::steady_clock::now();
+    afterStart = true;
+}
 
-    while(!afterStart){
-        if(timeRun == true)
-        {
-            start = std::chrono::steady_clock::now();
-            afterStart = true;
-            break;
-        }
-        
+void clockRunRegistration(){
+    
+    end = std::chrono::steady_clock::now();
+    //auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+    printf("trwa rejestracja\n");
+    //s30.try_lock_for(std::chrono::seconds(30));
+    std::this_thread::sleep_for(std::chrono::seconds(TIME_FOR_REGISTRATION));
+    printf("po rejestracji\n");
+    clockRunGap();
+
+    
+}
+
+void clockRunGap(){
+    registrationAvailable = false; mySendInt(TIME_GAP);
+    printf("synchronizacja\n");
+    std::this_thread::sleep_for(std::chrono::seconds(TIME_FOR_REGISTRATION + TIME_GAP));
+    clockRunGame();
+
+}
+
+void clockRunGame(){
+    printf("START\n");
+    gameRun = true;
+    sendClueToPlayers();
+    sendNumberOfPlayers();
+    
+
+    // nowa runda
+/*
+    if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP + TIME_FOR_GAME)) & (registrationAvailable == false ) & (gameRun == true) ) { 
+    registrationAvailable = true; gameRun = false; sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
+    start = std::chrono::steady_clock::now();
+    if(Client::numberOfPlayers > 1)
+    {(numberOfRound)++;}
+    else
+    {numberOfRound = 1;}
     }
 
-    end = std::chrono::steady_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
-    printf("first\n");
-    //s30.try_lock_for(std::chrono::seconds(30));
-    std::this_thread::sleep_for(std::chrono::seconds(30));
-    printf("second\n");
+    // nowa gra
 
-
-    if ((duration > TIME_FOR_REGISTRATION) & (registrationAvailable == true) ) 
-        { registrationAvailable = false; mySendInt(TIME_GAP);}
-
-    if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP)) & (gameRun == false) ) 
-        { gameRun = true;
-        sendClueToPlayers();
-        sendNumberOfPlayers();
-        }
-
-    if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP + TIME_FOR_GAME)) & (registrationAvailable == false ) & (gameRun == true) ) 
-        { 
-            registrationAvailable = true; gameRun = false; sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
-            start = std::chrono::steady_clock::now();
-            if(Client::numberOfPlayers > 1)
-            {(numberOfRound)++;}
-            else
-            {numberOfRound = 1;}
-            }
     if ((duration < TIME_FOR_REGISTRATION) & (numberOfRound == 1)){
         addQueuersToGame();
     }
+*/
+
 }
 
 void sendNumberOfPlayers(){
