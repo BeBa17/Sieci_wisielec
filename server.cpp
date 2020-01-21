@@ -222,15 +222,8 @@ char* myStringToChar(std::string str){
 
 void mySendInt(int numb){
     char res[3];
-    sprintf(res, "%d", numb);
-    if (numb >= 10)
-    {
-        res[2] = '\n';
-        sendToAllPly(res, 3);
-    } else {
-        res[1] = '\n';
-        sendToAllPly(res, 2);
-    }
+    int length = sprintf(res, "%d\n", numb);
+    sendToAllPly(res, length);
 }
 
 uint16_t readPort(char * txt){
@@ -304,20 +297,8 @@ void addQueuersToGame(){
             client->myWrite(myStringToChar("welcome\n"), 8);
             char duration[4];
             long int dur = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
-            sprintf(duration, "%ld", dur);
-            if (dur < 10)
-            {
-                duration[1] = '\n';
-                client->myWrite(duration, 2);
-                return;
-            }
-            if (dur < 100) {
-                duration[2] = '\n';
-                client->myWrite(duration, 3);
-                return;
-            }
-            duration[3] = '\n';
-            client->myWrite(duration, 4);
+            int length = sprintf(duration, "%ld\n", dur);
+            client->myWrite(duration, length);
         }
     }
 }
