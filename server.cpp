@@ -171,34 +171,34 @@ void clockRun(){
         
     }
 
-    while(true){
+    end = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+    printf("first\n");
+    //s30.try_lock_for(std::chrono::seconds(30));
+    std::this_thread::sleep_for(std::chrono::seconds(30));
+    printf("second\n");
 
-        end = std::chrono::steady_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
 
-        if ((duration > TIME_FOR_REGISTRATION) & (registrationAvailable == true) ) 
-            { registrationAvailable = false; mySendInt(TIME_GAP);}
+    if ((duration > TIME_FOR_REGISTRATION) & (registrationAvailable == true) ) 
+        { registrationAvailable = false; mySendInt(TIME_GAP);}
 
-        if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP)) & (gameRun == false) ) 
-            { gameRun = true;
-            sendClueToPlayers();
-            sendNumberOfPlayers();
+    if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP)) & (gameRun == false) ) 
+        { gameRun = true;
+        sendClueToPlayers();
+        sendNumberOfPlayers();
+        }
+
+    if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP + TIME_FOR_GAME)) & (registrationAvailable == false ) & (gameRun == true) ) 
+        { 
+            registrationAvailable = true; gameRun = false; sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
+            start = std::chrono::steady_clock::now();
+            if(Client::numberOfPlayers > 1)
+            {(numberOfRound)++;}
+            else
+            {numberOfRound = 1;}
             }
-
-        if ((duration > (TIME_FOR_REGISTRATION + TIME_GAP + TIME_FOR_GAME)) & (registrationAvailable == false ) & (gameRun == true) ) 
-            { 
-                registrationAvailable = true; gameRun = false; sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
-                start = std::chrono::steady_clock::now();
-                if(Client::numberOfPlayers > 1)
-                {(numberOfRound)++;}
-                else
-                {numberOfRound = 1;}
-                
-                
-            }
-        if ((duration < TIME_FOR_REGISTRATION) & (numberOfRound == 1)){
-            addQueuersToGame();
-        } 
+    if ((duration < TIME_FOR_REGISTRATION) & (numberOfRound == 1)){
+        addQueuersToGame();
     }
 }
 

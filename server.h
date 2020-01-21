@@ -11,11 +11,14 @@
 #include <unordered_set>
 #include <signal.h>
 #include <fstream>
+#include <mutex>
 #include <chrono>
 
 
 int epollFd;
 int servFd;
+
+std::timed_mutex s30;
 
 struct Handler {
     virtual ~Handler(){}
