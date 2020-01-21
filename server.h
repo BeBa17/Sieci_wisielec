@@ -49,7 +49,6 @@ bool gameRun = false;
 int numberOfRound = 1;
 int numberOfPlayers = 0;
 int numberOfClues = 0;
-bool afterStart = false;
 
 std::random_device dev;
 std::mt19937 rng(dev());
@@ -82,6 +81,3 @@ uint16_t readPort(char * txt);
 void setReuseAddr(int sock);
 
 std::fstream& GotoLine(std::fstream& file, int num);
-
-
-
