@@ -21,9 +21,9 @@ int servFd;
 
 
 std::mutex mutexForTime;
+std::mutex mutexForPlayers;
 int forLocker = false;
 
-std::unique_lock<std::mutex> locker;
 
 struct Handler {
     virtual ~Handler(){}
@@ -34,6 +34,7 @@ class Client : public Handler {
     
 public:
     static int numberOfPlayers;
+    static int numberOfPlayersNow;
     int _fd;
     Client(int fd);
     Client();
@@ -45,6 +46,7 @@ public:
     void remove();
 };
 
+int Client::numberOfPlayersNow = 0;
 int Client::numberOfPlayers = 0;
 
 std::unordered_set<Client*> clients;

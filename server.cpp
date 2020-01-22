@@ -34,6 +34,7 @@ Client::Client(int fd) : _fd(fd) {
         //std::thread secondThread(clockRunStart);
         //secondThread.join();
         clockRunStart();
+        mutexForPlayers.lock();
     }
     
 
@@ -79,7 +80,10 @@ void Client::handleEvent(uint32_t events){
                 }
             else {
                 if(std::stoi(odp) == iloscLiterDoOdkrycia){
-                    // podnosze semafor
+                    Client::numberOfPlayersNow--;
+                    if(Client::numberOfPlayersNow == 0){
+                        mutexForPlayers.unlock();
+                    }
                 }
                 else{
                     sendToAllPlyBut(_fd, myStringToChar(odp), odp.length());
@@ -212,6 +216,7 @@ void clockRunGame(){
     gameRun = true;
     sendNumberOfPlayers();
     if(Client::numberOfPlayers > 1){
+        Client::numberOfPlayersNow = Client::numberOfPlayers;
         sendClueToPlayers();
     }
     else{
@@ -222,8 +227,9 @@ void clockRunGame(){
     
     // SEMAFOR CZEKAJACY NA numberOfPlayers- zawodników
     
+    mutexForPlayers.lock();
     // nowa runda
-
+    printf("Koniec Rundy\n");
     /*registrationAvailable = true; gameRun = false; 
     sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
     start = std::chrono::steady_clock::now();
@@ -249,8 +255,8 @@ void sendClueToPlayers(){
     printf("Zaraz przyjdzie hasło\n");
     GotoLine(fileWithCodes, haslo(rng));
     fileWithCodes >> actualCode;
-    printf(myStringToChar(actualCode));
-    iloscLiterDoOdkrycia = (actualCode.length() - 1);
+    iloscLiterDoOdkrycia = (actualCode.length());
+    mySendInt(iloscLiterDoOdkrycia);
     sendToAllPly(myStringToChar(actualCode), actualCode.length());
     char endline = '\n';
     sendToAllPly(&endline, 1); 
