@@ -31,8 +31,11 @@ Client::Client(int fd) : _fd(fd) {
     ::write(fd,"welcome\n", std::strlen("welcome\n"));
 
     if(afterStart == false){
+        //std::thread secondThread(clockRunStart);
+        //secondThread.join();
         clockRunStart();
     }
+    
 
     timeRun = true;
 
@@ -42,6 +45,7 @@ Client::Client(int fd) : _fd(fd) {
         Client::numberOfPlayers++;
         
         char duration[4];
+        end = std::chrono::steady_clock::now();
         long int dur = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
         int length = sprintf(duration, "%ld\n", dur%10000);
         this->myWrite(duration, length);
@@ -142,6 +146,10 @@ int main(int argc, char ** argv){
     while(getline(fileWithCodes, line))
         numberOfClues++;
 
+    //std::unique_lock<std::mutex> locker(mutexForTime);
+    mutexForTime.lock();
+    forLocker = true;
+
     std::thread clockR(clockRunRegistration);
     // Pętla przyjmująca nowe połączenia oraz, w trakcie gry, zczytująca wyniki rundy
     while(true){
@@ -151,6 +159,11 @@ int main(int argc, char ** argv){
         }
         ((Handler*)ee.data.ptr)->handleEvent(ee.events);
         end = std::chrono::steady_clock::now();
+        //condForTime.notify_one();
+        if(forLocker == true){
+            forLocker = false;
+            mutexForTime.unlock();
+        }
         
 
     }
@@ -160,9 +173,17 @@ void clockRunStart(){
     
     start = std::chrono::steady_clock::now();
     afterStart = true;
+    
 }
 
 void clockRunRegistration(){
+
+    printf("sds");
+    //condForTime.wait(locker);
+    if(forLocker == true){
+        mutexForTime.lock();
+    }
+    //forLocker = false;
     
     end = std::chrono::steady_clock::now();
     //auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();

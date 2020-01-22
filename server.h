@@ -12,6 +12,7 @@
 #include <signal.h>
 #include <fstream>
 #include <mutex>
+#include <condition_variable>
 #include <chrono>
 
 
@@ -19,6 +20,11 @@ int epollFd;
 int servFd;
 
 std::timed_mutex s30;
+std::condition_variable condForTime;
+std::mutex mutexForTime;
+int forLocker = false;
+
+std::unique_lock<std::mutex> locker;
 
 struct Handler {
     virtual ~Handler(){}
