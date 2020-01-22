@@ -19,8 +19,7 @@
 int epollFd;
 int servFd;
 
-std::timed_mutex s30;
-std::condition_variable condForTime;
+
 std::mutex mutexForTime;
 int forLocker = false;
 

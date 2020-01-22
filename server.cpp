@@ -20,8 +20,8 @@
 #include <thread>
 #include "server.h"
 
-#define TIME_FOR_REGISTRATION 60
-#define TIME_GAP 10
+#define TIME_FOR_REGISTRATION 30
+#define TIME_GAP 5
 #define TIME_FOR_GAME 10
 
 Client::Client(int fd) : _fd(fd) {
@@ -179,16 +179,12 @@ void clockRunStart(){
 void clockRunRegistration(){
 
     printf("sds");
-    //condForTime.wait(locker);
     if(forLocker == true){
         mutexForTime.lock();
     }
-    //forLocker = false;
     
     end = std::chrono::steady_clock::now();
-    //auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
     printf("trwa rejestracja\n");
-    //s30.try_lock_for(std::chrono::seconds(30));
     std::this_thread::sleep_for(std::chrono::seconds(TIME_FOR_REGISTRATION));
     printf("po rejestracji\n");
     clockRunGap();
@@ -241,8 +237,10 @@ void sendNumberOfPlayers(){
 void sendClueToPlayers(){
     std::string actualCode;
 
+    printf("Zaraz przyjdzie hasło\n");
     GotoLine(fileWithCodes, haslo(rng));
     fileWithCodes >> actualCode;
+    printf(myStringToChar(actualCode));
     sendToAllPly(myStringToChar(actualCode), actualCode.length());
     char endline = '\n';
     sendToAllPly(&endline, 1); 
