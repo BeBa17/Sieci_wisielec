@@ -223,16 +223,16 @@ void clockRunGame(){
         clockRunRegistration();
     }
     
-    // SEMAFOR CZEKAJACY NA numberOfPlayers- zawodników
-    
     mutexForPlayers.lock();
+    mutexForPlayers.unlock();
     // nowa runda
     printf("Koniec Rundy\n");
-    /*registrationAvailable = true; gameRun = false; 
+    registrationAvailable = true; gameRun = false; 
     sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
     start = std::chrono::steady_clock::now();
     if(Client::numberOfPlayers > 1){
         (numberOfRound)++;
+        mutexForPlayers.lock();
         clockRunGap();
         }
     else{
@@ -240,7 +240,7 @@ void clockRunGame(){
         numberOfRound = 1;
         addQueuersToGame();
         clockRunRegistration();
-    }*/
+    }
     }
 
 void sendNumberOfPlayers(){
@@ -251,6 +251,7 @@ void sendClueToPlayers(){
     std::string actualCode;
 
     printf("Zaraz przyjdzie hasło\n");
+    mySendInt(numberOfClues);
     GotoLine(fileWithCodes, haslo(rng));
     fileWithCodes >> actualCode;
     iloscLiterDoOdkrycia = (actualCode.length());
