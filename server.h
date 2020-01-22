@@ -59,6 +59,7 @@ bool gameRun = false;
 int numberOfRound = 1;
 int numberOfPlayers = 0;
 int numberOfClues = 0;
+int iloscLiterDoOdkrycia = 0;
 
 std::random_device dev;
 std::mt19937 rng(dev());
@@ -75,6 +76,8 @@ void clockRunGap();
 void clockRunGame();
 
 void sendToAllBut(int fd, char * buffer, int count);
+
+void sendToAllPlyBut(int fd, char * buffer, int count);
 
 void sendToAllPly(char * buffer, int count);
 

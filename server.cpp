@@ -22,7 +22,7 @@
 
 #define TIME_FOR_REGISTRATION 30
 #define TIME_GAP 5
-#define TIME_FOR_GAME 10
+#define TIME_FOR_GAME 100
 
 Client::Client(int fd) : _fd(fd) {
     epoll_event ee {EPOLLIN|EPOLLRDHUP, {.ptr=this}};
@@ -78,7 +78,12 @@ void Client::handleEvent(uint32_t events){
                 this->remove();
                 }
             else {
-                printf("Znakow %s", myStringToChar(odp));
+                if(std::stoi(odp) == iloscLiterDoOdkrycia){
+                    // podnosze semafor
+                }
+                else{
+                    sendToAllPlyBut(_fd, myStringToChar(odp), odp.length());
+                }
                 }
             }
     }
@@ -146,6 +151,7 @@ int main(int argc, char ** argv){
     while(getline(fileWithCodes, line))
         numberOfClues++;
 
+    fileWithCodes.clear();
     //std::unique_lock<std::mutex> locker(mutexForTime);
     mutexForTime.lock();
     forLocker = true;
@@ -204,31 +210,34 @@ void clockRunGap(){
 void clockRunGame(){
     printf("START\n");
     gameRun = true;
-    sendClueToPlayers();
     sendNumberOfPlayers();
-    
-
-    // nowa runda
-
-    if (endOfRound == true) { 
-    registrationAvailable = true; gameRun = false; sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
-    start = std::chrono::steady_clock::now();
     if(Client::numberOfPlayers > 1){
-        (numberOfRound)++;
-        }
+        sendClueToPlayers();
+    }
     else{
         numberOfRound = 1;
         addQueuersToGame();
         clockRunRegistration();
     }
-    }
-
-    // nowa gra
-
     
+    // SEMAFOR CZEKAJACY NA numberOfPlayers- zawodników
+    
+    // nowa runda
 
-
-}
+    /*registrationAvailable = true; gameRun = false; 
+    sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
+    start = std::chrono::steady_clock::now();
+    if(Client::numberOfPlayers > 1){
+        (numberOfRound)++;
+        clockRunGap();
+        }
+    else{
+        // nowa gra
+        numberOfRound = 1;
+        addQueuersToGame();
+        clockRunRegistration();
+    }*/
+    }
 
 void sendNumberOfPlayers(){
     mySendInt(Client::numberOfPlayers);
@@ -241,6 +250,7 @@ void sendClueToPlayers(){
     GotoLine(fileWithCodes, haslo(rng));
     fileWithCodes >> actualCode;
     printf(myStringToChar(actualCode));
+    iloscLiterDoOdkrycia = (actualCode.length() - 1);
     sendToAllPly(myStringToChar(actualCode), actualCode.length());
     char endline = '\n';
     sendToAllPly(&endline, 1); 
@@ -283,6 +293,16 @@ void sendToAllBut(int fd, char * buffer, int count){
         Client * client = *it;
         it++;
         if(client->fd()!=fd)
+            client->myWrite(buffer, count);
+    }
+}
+
+void sendToAllPlyBut(int fd, char * buffer, int count){
+    auto it = clients.begin();
+    while(it!=clients.end()){
+        Client * client = *it;
+        it++;
+        if(client->fd()!=fd && client->player == true)
             client->myWrite(buffer, count);
     }
 }
