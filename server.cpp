@@ -72,9 +72,7 @@ void Client::handleEvent(uint32_t events){
         if(count > 0){
             std::string buff(buffer);
             std::string odp(buff.substr(0,1));
-            std::cout<<odp;
-            std::cout<<this->_fd;
-            if(odp == "-1"){
+            if(odp == "-"){
                 printf("Przegrana");
                 this->remove();
                 }
@@ -305,11 +303,27 @@ void sendToAllBut(int fd, char * buffer, int count){
 
 void sendToAllPlyBut(int fd, char * buffer, int count){
     auto it = clients.begin();
+    std::string stringToSend="";
     while(it!=clients.end()){
         Client * client = *it;
         it++;
-        if(client->fd()!=fd && client->player == true)
-            client->myWrite(buffer, count);
+        if(client->fd()!=fd && client->player == true){
+            std::string myfd = std::to_string(fd);
+            char const *my_fd = myfd.c_str();
+            if(strlen(buffer)==1){
+                stringToSend.append("0");
+            }
+            stringToSend.append(buffer);
+            stringToSend.append("-");
+            if(strlen(my_fd)==1){
+                stringToSend.append("0");
+            }
+            stringToSend.append(my_fd);
+            stringToSend.append("\n");
+            count = stringToSend.length();
+            client->myWrite(myStringToChar(stringToSend), count);
+            printf(myStringToChar(stringToSend));
+        }
     }
 }
 
