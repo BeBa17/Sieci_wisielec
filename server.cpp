@@ -54,6 +54,7 @@ Client::~Client(){
     if(this->player==true)
     {
         Client::numberOfPlayers--;
+        Client::numberOfPlayersNow--;
     }
     epoll_ctl(epollFd, EPOLL_CTL_DEL, _fd, nullptr);
     shutdown(_fd, SHUT_RDWR);
@@ -69,20 +70,23 @@ void Client::handleEvent(uint32_t events){
             std::string buff(buffer);
             std::string odp(buff.substr(0,count));
             if(odp.substr(0,2) == "-1"){
-                printf("Przegrana");
+                printf("Przegrana ");
                 this->remove();
                 }
             else {
                 if(std::stoi(odp) == iloscLiterDoOdkrycia){
                     Client::numberOfPlayersNow--;
-                    if(Client::numberOfPlayersNow == 0){
-                        mutexForPlayers.unlock();
-                    }
+                    
                 }
                 else{
                     sendToAllPlyBut(_fd, myStringToChar(odp), odp.length());
                 }
                 }
+                
+
+            }
+            if(Client::numberOfPlayersNow == 0){
+                        mutexForPlayers.unlock();
             }
     }
 }
@@ -218,8 +222,8 @@ void clockRunGame(){
         clockRunRegistration();
     }
     
-    mutexForPlayers.lock();
-    mutexForPlayers.unlock();
+    mutexForPlayers.lock(); // najprawdoodobniej mam unlock
+    mutexForPlayers.unlock(); // narazie niepotrzebne ?
     // nowa runda
     printf("Koniec Rundy\n");
     registrationAvailable = true; gameRun = false; 
@@ -233,6 +237,7 @@ void clockRunGame(){
     else{
         // nowa gra
         numberOfRound = 1;
+        mutexForPlayers.lock();
         addQueuersToGame();
         clockRunRegistration();
     }
@@ -253,6 +258,7 @@ void sendClueToPlayers(){
     GotoLine(fileWithCodes, haslo(rng));
     getline(fileWithCodes, actualCode);
     
+    mySendInt(numberOfRound);
     sendToAllPly(myStringToChar(actualCode), actualCode.length());
     char endline = '\n';
     sendToAllPly(&endline, 1);
