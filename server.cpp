@@ -73,10 +73,14 @@ void Client::handleEvent(uint32_t events){
             std::string odp(buff.substr(0,count));
             if(odp.substr(0,2) == "-1"){
                 printf("Przegrana ");
-                this->remove();
+                //this->remove();
+                Client::numberOfPlayers--;
+                Client::numberOfPlayersNow--;
+                this->player = false;
                 }
             else {
                 if(std::stoi(odp) == iloscLiterDoOdkrycia){
+                    sendToAllPlyBut(_fd, myStringToChar(odp), odp.length());
                     Client::numberOfPlayersNow--;
                     
                 }
@@ -238,6 +242,7 @@ void clockRunGame(){
         }
     else{
         // nowa gra
+        sendToAllPly(myStringToChar("win\n"), std::strlen("win\n"));
         numberOfRound = 1;
         mutexForPlayers.lock();
         addQueuersToGame();
@@ -267,9 +272,7 @@ void sendClueToPlayers(){
 
     actualCode = actualCode.substr(actualCode.find_first_of(":")+1);
     actualCode.erase(remove_if(actualCode.begin(), actualCode.end()), actualCode.end());
-    sendToAllPly(myStringToChar(actualCode), actualCode.length());
     iloscLiterDoOdkrycia = std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>{}.from_bytes(actualCode).size();
-    mySendInt(iloscLiterDoOdkrycia);
     //sendToAllPly(&endline, 1);
      
 }
