@@ -28,11 +28,7 @@ Client::Client(int fd) : _fd(fd) {
     epoll_event ee {EPOLLIN|EPOLLRDHUP, {.ptr=this}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, _fd, &ee);
 
-    ::write(fd,"welcome\n", std::strlen("welcome\n"));
-
     if(afterStart == false){
-        //std::thread secondThread(clockRunStart);
-        //secondThread.join();
         clockRunStart();
         mutexForPlayers.lock();
     }
@@ -255,15 +251,19 @@ void sendClueToPlayers(){
     std::uniform_int_distribution<std::mt19937::result_type> haslo(0,numberOfClues);
 
     printf("Zaraz przyjdzie hasło\n");
-    mySendInt(numberOfClues);
     GotoLine(fileWithCodes, haslo(rng));
-    //fileWithCodes >> actualCode;
     getline(fileWithCodes, actualCode);
-    iloscLiterDoOdkrycia = (actualCode.length());
-    mySendInt(iloscLiterDoOdkrycia);
+    
     sendToAllPly(myStringToChar(actualCode), actualCode.length());
     char endline = '\n';
-    sendToAllPly(&endline, 1); 
+    sendToAllPly(&endline, 1);
+
+    actualCode = actualCode.substr(actualCode.find_first_of(" \t")+1);
+    actualCode.erase(remove_if(actualCode.begin(), actualCode.end(), isspace), actualCode.end());
+    iloscLiterDoOdkrycia = actualCode.length();
+    //mySendInt(iloscLiterDoOdkrycia);
+    //sendToAllPly(&endline, 1);
+     
 }
 
 char* myStringToChar(std::string str){

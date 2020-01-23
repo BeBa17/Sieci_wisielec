@@ -24,6 +24,16 @@ std::mutex mutexForTime;
 std::mutex mutexForPlayers;
 int forLocker = false;
 
+template<typename T, typename P>
+T remove_if(T beg, T end, P pred)
+{
+    T dest = beg;
+    for (T itr = beg;itr != end; ++itr)
+        if (!pred(*itr))
+            *(dest++) = *itr;
+    return dest;
+}
+
 
 struct Handler {
     virtual ~Handler(){}
@@ -63,9 +73,7 @@ int numberOfPlayers = 0;
 int numberOfClues = 0;
 int iloscLiterDoOdkrycia = 0;
 
-std::random_device dev;
-std::mt19937 rng(dev());
-std::uniform_int_distribution<std::mt19937::result_type> haslo(0,numberOfClues);
+
 
 void ctrl_c(int);
 
