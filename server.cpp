@@ -63,12 +63,12 @@ void Client::handleEvent(uint32_t events){
     if(gameRun == false)
         return;
     if(events & EPOLLIN) {
-        char buffer[2];
-        ssize_t count = read(_fd, buffer, 2);
+        char buffer[4];
+        ssize_t count = read(_fd, buffer, 4);
         if(count > 0){
             std::string buff(buffer);
-            std::string odp(buff.substr(0,1));
-            if(odp == "-"){
+            std::string odp(buff.substr(0,count));
+            if(odp.substr(0,2) == "-1"){
                 printf("Przegrana");
                 this->remove();
                 }
@@ -182,7 +182,6 @@ void clockRunStart(){
 
 void clockRunRegistration(){
 
-    printf("sds");
     if(forLocker == true){
         mutexForTime.lock();
     }
@@ -316,10 +315,11 @@ void sendToAllPlyBut(int fd, char * buffer, int count){
         if(client->fd()!=fd && client->player == true){
             std::string myfd = std::to_string(fd);
             char const *my_fd = myfd.c_str();
-            if(strlen(buffer)==1){
+            if(strlen(buffer) == 2){
                 stringToSend.append("0");
             }
             stringToSend.append(buffer);
+            stringToSend = stringToSend.substr(0,2);
             stringToSend.append("-");
             if(strlen(my_fd)==1){
                 stringToSend.append("0");
@@ -370,8 +370,8 @@ void addQueuersToGame(){
         if(client->player == false){
             client->player = true;
             Client::numberOfPlayers++;
-            char duration[4];
-            long int dur = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+            char duration[2];
+            long int dur = 0;
             int length = sprintf(duration, "%ld\n", dur);
             client->myWrite(duration, length);
         }
