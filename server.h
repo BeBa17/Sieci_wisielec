@@ -24,12 +24,12 @@ std::mutex mutexForTime;
 std::mutex mutexForPlayers;
 int forLocker = false;
 
-template<typename T, typename P>
-T remove_if(T beg, T end, P pred)
+template<typename T>
+T remove_if(T beg, T end)
 {
     T dest = beg;
     for (T itr = beg;itr != end; ++itr)
-        if (!pred(*itr))
+        if ('_'!=(*itr))
             *(dest++) = *itr;
     return dest;
 }

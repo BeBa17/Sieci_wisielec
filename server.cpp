@@ -12,7 +12,9 @@
 #include <unordered_set>
 #include <signal.h>
 #include <chrono>
+#include <codecvt>
 #include <string>
+#include <locale>
 #include <cstring>
 #include <limits>
 #include <random>
@@ -263,10 +265,11 @@ void sendClueToPlayers(){
     char endline = '\n';
     sendToAllPly(&endline, 1);
 
-    actualCode = actualCode.substr(actualCode.find_first_of(" \t")+1);
-    actualCode.erase(remove_if(actualCode.begin(), actualCode.end(), isspace), actualCode.end());
-    iloscLiterDoOdkrycia = actualCode.length();
-    //mySendInt(iloscLiterDoOdkrycia);
+    actualCode = actualCode.substr(actualCode.find_first_of(":")+1);
+    actualCode.erase(remove_if(actualCode.begin(), actualCode.end()), actualCode.end());
+    sendToAllPly(myStringToChar(actualCode), actualCode.length());
+    iloscLiterDoOdkrycia = std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>{}.from_bytes(actualCode).size();
+    mySendInt(iloscLiterDoOdkrycia);
     //sendToAllPly(&endline, 1);
      
 }
