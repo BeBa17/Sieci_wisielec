@@ -228,8 +228,8 @@ void clockRunGame(){
         clockRunRegistration();
     }
     
-    mutexForPlayers.lock(); // najprawdoodobniej mam unlock
-    mutexForPlayers.unlock(); // narazie niepotrzebne ?
+    mutexForPlayers.lock(); 
+    mutexForPlayers.unlock(); 
     // nowa runda
     printf("Koniec Rundy\n");
     registrationAvailable = true; gameRun = false; 
@@ -340,7 +340,6 @@ void sendToAllPlyBut(int fd, char * buffer, int count){
             stringToSend.append("\n");
             count = stringToSend.length();
             client->myWrite(myStringToChar(stringToSend), count);
-            printf(myStringToChar(stringToSend));
         }
     }
 }
@@ -382,10 +381,7 @@ void addQueuersToGame(){
         if(client->player == false){
             client->player = true;
             Client::numberOfPlayers++;
-            char duration[2];
-            long int dur = 0;
-            int length = sprintf(duration, "%ld\n", dur);
-            client->myWrite(duration, length);
+            //mySendInt(0);
         }
     }
 }

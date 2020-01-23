@@ -5,11 +5,9 @@ serwer:
     scan-build znajduje m. inn. "warning: Use of memory after it is freed"
 
     [!] brak plików systemu budowania
-    [!] całkowity brak synchronizacji między wątkami - id gracza + ilość pkt
     [] brak obsługi błędów z write.
-    [] brakuje części rzeczy które są w opisie projektu
+    [] brakuje części rzeczy które są w opisie projektu - na koniec jeszcze sprawdzić
     [.] TIME_FOR_REGISTRATION, TIME_GAP, TIME_FOR_GAME powinny trafić do pliku konfiguracyjnego
     [!] l62 - jeśli to wystąpi, będziecie się pętlić na epollu
-    [!] l174: kolejna pętla zjadająca 100% CPU
     [] gra powinna się kończyć jak tylko Client::numberOfPlayers == 1, a nie upływie stałego czasu
 
