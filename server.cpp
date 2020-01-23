@@ -250,10 +250,15 @@ void sendNumberOfPlayers(){
 void sendClueToPlayers(){
     std::string actualCode;
 
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<std::mt19937::result_type> haslo(0,numberOfClues);
+
     printf("Zaraz przyjdzie hasło\n");
     mySendInt(numberOfClues);
     GotoLine(fileWithCodes, haslo(rng));
-    fileWithCodes >> actualCode;
+    //fileWithCodes >> actualCode;
+    getline(fileWithCodes, actualCode);
     iloscLiterDoOdkrycia = (actualCode.length());
     mySendInt(iloscLiterDoOdkrycia);
     sendToAllPly(myStringToChar(actualCode), actualCode.length());
