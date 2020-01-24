@@ -26,6 +26,10 @@
 #define TIME_GAP 5
 #define TIME_FOR_GAME 100
 
+void handler(int s){
+    printf("Caught SIGPIPE\n");
+}
+
 Client::Client(int fd) : _fd(fd) {
     epoll_event ee {EPOLLIN|EPOLLRDHUP, {.ptr=this}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, _fd, &ee);
@@ -148,6 +152,8 @@ int main(int argc, char ** argv){
     epoll_event ee {EPOLLIN, {.ptr=&servHandler}};
     epoll_ctl(epollFd, EPOLL_CTL_ADD, servFd, &ee);
 
+    signal(SIGPIPE, handler);
+
     std::string line;
     fileWithCodes.open("hasla.txt");
     if(!fileWithCodes){
@@ -188,6 +194,7 @@ void clockRunStart(){
 
 void clockRunRegistration(){
 
+    signal(SIGPIPE, handler);
     if(forLocker == true){
         mutexForTime.lock();
     }

@@ -73,7 +73,7 @@ int numberOfPlayers = 0;
 int numberOfClues = 0;
 int iloscLiterDoOdkrycia = 0;
 
-
+void handler(int);
 
 void ctrl_c(int);
 
