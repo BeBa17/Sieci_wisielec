@@ -219,6 +219,7 @@ void clockRunGap(){
 
 void clockRunGame(){
     signal(SIGPIPE, handler);
+    fileWithCodes.clear();
     printf("START\n");
     gameRun = true;
     sendNumberOfPlayers();
