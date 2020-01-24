@@ -95,7 +95,18 @@ void Client::handleEvent(uint32_t events){
 }
 
 void Client::handleEvent2(uint32_t events){
-    this->remove();
+    if(events & EPOLLIN) {
+        char buffer[4];
+        ssize_t count = read(_fd, buffer, 4);
+        if(count > 0){
+            std::string buff(buffer);
+            std::string odp(buff.substr(0,count));
+            if(odp.substr(0,2) == "-1"){
+                printf("Przegrana ");
+                this->remove();
+            }
+        }
+    }
 }
 
 void Client::myWrite(char * buffer, int count){
@@ -139,17 +150,45 @@ void removingFd(){
     epollFd = epoll_create1(0);
     
     epoll_event ee {EPOLLIN, {.ptr=&servHandler}};
-    epoll_ctl(epollFd, EPOLL_CTL_DEL, servFd, &ee);
+    epoll_ctl(epollFd, EPOLL_CTL_ADD, servFd, &ee);
 
     signal(SIGPIPE, handler);
 
     while(true){
-        printf("waiting in removingFd\n");
-        if(-1 == epoll_wait(epollFd, &ee, 2, -1)) {
+        //rintf("waiting in removingFd\n");
+        if(-1 == epoll_wait(epollFd, &ee, 1, -1)) {
             error(0,errno,"epoll_wait failed");
             ctrl_c(SIGINT);
         }
         ((Handler*)ee.data.ptr)->handleEvent2(ee.events);
+        
+
+    }
+}
+
+void connectingFd(){
+
+    setReuseAddr(servFd);
+
+    epollFd = epoll_create1(0);
+    
+    epoll_event ee {EPOLLIN, {.ptr=&servHandler}};
+    epoll_ctl(epollFd, EPOLL_CTL_ADD, servFd, &ee);
+
+    signal(SIGPIPE, handler);
+
+    while(true){
+        //printf("waiting in accepting clients\n");
+        if(-1 == epoll_wait(epollFd, &ee, 1, -1)) {
+            error(0,errno,"epoll_wait failed");
+            ctrl_c(SIGINT);
+        }
+        ((Handler*)ee.data.ptr)->handleEvent(ee.events);
+        end = std::chrono::steady_clock::now();
+        if(forLocker == true){
+            forLocker = false;
+            mutexForTime.unlock();
+        }
         
 
     }
@@ -194,23 +233,14 @@ int main(int argc, char ** argv){
     forLocker = true;
 
     std::thread toRemove(removingFd);
+    std::thread toConnect(connectingFd);
     std::thread clockR(clockRunRegistration);
     // Pętla przyjmująca nowe połączenia oraz, w trakcie gry, zczytująca wyniki rundy
-    while(true){
-        printf("waiting in accepting clients\n");
-        if(-1 == epoll_wait(epollFd, &ee, 2, -1)) {
-            error(0,errno,"epoll_wait failed");
-            ctrl_c(SIGINT);
-        }
-        ((Handler*)ee.data.ptr)->handleEvent(ee.events);
-        end = std::chrono::steady_clock::now();
-        if(forLocker == true){
-            forLocker = false;
-            mutexForTime.unlock();
-        }
-        
 
-    }
+    clockR.join();
+    toConnect.join();
+    toRemove.join();
+    
 }
 
 void clockRunStart(){
