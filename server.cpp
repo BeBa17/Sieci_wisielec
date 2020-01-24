@@ -218,6 +218,7 @@ void clockRunGap(){
 }
 
 void clockRunGame(){
+    signal(SIGPIPE, handler);
     printf("START\n");
     gameRun = true;
     sendNumberOfPlayers();
@@ -235,7 +236,6 @@ void clockRunGame(){
     mutexForPlayers.unlock(); 
     // nowa runda
     printf("Koniec Rundy\n");
-    registrationAvailable = true; gameRun = false; 
     sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
     start = std::chrono::steady_clock::now();
     if(Client::numberOfPlayers > 1){
@@ -246,6 +246,8 @@ void clockRunGame(){
     else{
         // nowa gra
         sendToAllPly(myStringToChar("win\n"), std::strlen("win\n"));
+        registrationAvailable = true; 
+        gameRun = false; 
         numberOfRound = 1;
         mutexForPlayers.lock();
         addQueuersToGame();
