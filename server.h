@@ -38,6 +38,7 @@ T remove_if(T beg, T end)
 struct Handler {
     virtual ~Handler(){}
     virtual void handleEvent(uint32_t events) = 0;
+    virtual void handleEvent2(uint32_t events) = 0;
 };
 
 class Client : public Handler {
@@ -52,6 +53,7 @@ public:
     bool player;
     int fd() const {return _fd;}
     virtual void handleEvent(uint32_t events);
+    virtual void handleEvent2(uint32_t events);
     void myWrite(char * buffer, int count);
     void remove();
 };

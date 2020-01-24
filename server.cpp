@@ -24,7 +24,6 @@
 
 #define TIME_FOR_REGISTRATION 30
 #define TIME_GAP 5
-#define TIME_FOR_GAME 100
 
 void handler(int s){
     printf("Caught SIGPIPE\n");
@@ -89,14 +88,16 @@ void Client::handleEvent(uint32_t events){
                     sendToAllPlyBut(_fd, myStringToChar(odp), odp.length());
                 }
                 }
-                
-
             }
             if(Client::numberOfPlayersNow == 0){
-                        mutexForPlayers.unlock();
-            }
+                        mutexForPlayers.unlock();}
     }
 }
+
+void Client::handleEvent2(uint32_t events){
+    this->remove();
+}
+
 void Client::myWrite(char * buffer, int count){
     if(count != ::write(_fd, buffer, count))
         remove();   
@@ -126,7 +127,33 @@ class : Handler {
             ctrl_c(SIGINT);
         }
     }
+    virtual void handleEvent2(uint32_t events) override {
+        
+    }
 } servHandler;
+
+void removingFd(){
+
+    setReuseAddr(servFd);
+
+    epollFd = epoll_create1(0);
+    
+    epoll_event ee {EPOLLIN, {.ptr=&servHandler}};
+    epoll_ctl(epollFd, EPOLL_CTL_DEL, servFd, &ee);
+
+    signal(SIGPIPE, handler);
+
+    while(true){
+        printf("waiting in removingFd\n");
+        if(-1 == epoll_wait(epollFd, &ee, 2, -1)) {
+            error(0,errno,"epoll_wait failed");
+            ctrl_c(SIGINT);
+        }
+        ((Handler*)ee.data.ptr)->handleEvent2(ee.events);
+        
+
+    }
+}
 
 int main(int argc, char ** argv){
     if(argc != 2) error(1, 0, "Need 1 arg (port)");
@@ -166,16 +193,17 @@ int main(int argc, char ** argv){
     mutexForTime.lock();
     forLocker = true;
 
+    std::thread toRemove(removingFd);
     std::thread clockR(clockRunRegistration);
     // Pętla przyjmująca nowe połączenia oraz, w trakcie gry, zczytująca wyniki rundy
     while(true){
-        if(-1 == epoll_wait(epollFd, &ee, 1, -1)) {
+        printf("waiting in accepting clients\n");
+        if(-1 == epoll_wait(epollFd, &ee, 2, -1)) {
             error(0,errno,"epoll_wait failed");
             ctrl_c(SIGINT);
         }
         ((Handler*)ee.data.ptr)->handleEvent(ee.events);
         end = std::chrono::steady_clock::now();
-        //condForTime.notify_one();
         if(forLocker == true){
             forLocker = false;
             mutexForTime.unlock();
