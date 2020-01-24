@@ -10,8 +10,4 @@ Program będzie umożliwiał rozgrywanie tylko jednej gry w tym samym czasie, tz
 Hasła przechowywane będą w banku danych i losowane dla kolejnych gier (etapów). Przewidujemy również możliwość posegregowania haseł na łatwe, średnie i trudne, oraz według kategorii znaczeniowych.
 
 #### TODO:
-#### Nie działa dla:
-  U1: logowanie
-  U1: wyjście
-  U1: logowanie
-  -- Segmentation fault
+#### Czasami hasło wysłane jest dwa razy
