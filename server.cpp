@@ -74,9 +74,6 @@ void Client::handleEvent(uint32_t events){
             if(odp.substr(0,2) == "-1"){
                 printf("Przegrana ");
                 this->remove();
-                /*Client::numberOfPlayers--;
-                Client::numberOfPlayersNow--;
-                this->player = false;*/
                 }
             else {
                 if(std::stoi(odp) == iloscLiterDoOdkrycia){
@@ -142,12 +139,6 @@ int main(int argc, char ** argv){
     sockaddr_in serverAddr{.sin_family=AF_INET, .sin_port=htons((short)port), .sin_addr={INADDR_ANY}};
     int res = bind(servFd, (sockaddr*) &serverAddr, sizeof(serverAddr));
     if(res) error(1, errno, "bind failed");
-
-    /*struct sigaction act;
-    act.sa_handler = SIG_IGN;
-    act.sa_flags = SA_RESTART;
-
-    sigaction(SIGPIPE, &act, NULL);*/
     
     res = listen(servFd, 1);
     if(res) error(1, errno, "listen failed");
@@ -166,7 +157,6 @@ int main(int argc, char ** argv){
         numberOfClues++;
 
     fileWithCodes.clear();
-    //std::unique_lock<std::mutex> locker(mutexForTime);
     mutexForTime.lock();
     forLocker = true;
 
