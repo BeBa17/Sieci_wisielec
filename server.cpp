@@ -102,8 +102,20 @@ void Client::handleEvent2(uint32_t events){
             if(odp.substr(0,2) == "-1"){
                 printf("Przegrana ");
                 this->remove();
+                }
+            else {
+                if(std::stoi(odp) == iloscLiterDoOdkrycia){
+                    sendToAllPlyBut(_fd, myStringToChar(odp), odp.length());
+                    Client::numberOfPlayersNow--;
+                    
+                }
+                else{
+                    sendToAllPlyBut(_fd, myStringToChar(odp), odp.length());
+                }
+                }
             }
-        }
+            if(Client::numberOfPlayersNow == 0){
+                        mutexForPlayers.unlock();}
     }
 }
 
