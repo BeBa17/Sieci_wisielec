@@ -66,8 +66,6 @@ Client::~Client(){
     close(_fd);
 }
 void Client::handleEvent(uint32_t events){
-    if(gameRun == false)
-        return;
     if(events & EPOLLIN) {
         char buffer[4];
         ssize_t count = read(_fd, buffer, 4);

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "Uruchomiono skrypt o nazwie $0"
+if [ $# -lt 1 ]
+  then
+  echo "Blad. Podaj w argumencie numer portu"
+else
+    g++ --std=c++17 -Wall -O0 -g -pthread -o server server.cpp
+    echo "Program po kompilacji"
+    ./server $1
+fi
