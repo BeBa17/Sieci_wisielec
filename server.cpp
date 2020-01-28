@@ -53,7 +53,9 @@ Client::Client(int fd) : _fd(fd) {
         this->myWrite(duration, length);
     } else {
         this->player = false;
-        ::write(fd,"wait\n", std::strlen("wait\n"));}
+        if(::write(fd,"wait\n", std::strlen("wait\n")) < 0){
+            printf("Error during sending a message\n");
+        }}
 }
 Client::~Client(){
     if(this->player==true)
@@ -82,7 +84,7 @@ void Client::handleEvent(uint32_t events){
                     Client::numberOfPlayersNow--;
                     
                 }
-                else{
+                else if(std::stoi(odp) < iloscLiterDoOdkrycia){
                     sendToAllPlyBut(_fd, myStringToChar(odp), odp.length());
                 }
                 }
@@ -109,7 +111,7 @@ void Client::handleEvent2(uint32_t events){
                     Client::numberOfPlayersNow--;
                     
                 }
-                else{
+                else if(std::stoi(odp) < iloscLiterDoOdkrycia){
                     sendToAllPlyBut(_fd, myStringToChar(odp), odp.length());
                 }
                 }
@@ -121,7 +123,7 @@ void Client::handleEvent2(uint32_t events){
 
 void Client::myWrite(char * buffer, int count){
     if(count != ::write(_fd, buffer, count))
-        remove();   
+        remove();
 }
 void Client::remove() {
     printf("removing %d\n", _fd);
@@ -205,6 +207,7 @@ void connectingFd(){
 }
 
 int main(int argc, char ** argv){
+    printf("Server is running!\n\n");
     if(argc != 2) error(1, 0, "Need 1 arg (port)");
     auto port = readPort(argv[1]);
     
@@ -304,7 +307,7 @@ void clockRunGame(){
     mutexForPlayers.lock(); 
     mutexForPlayers.unlock(); 
     // nowa runda
-    printf("Koniec Rundy\n");
+    printf("Koniec Rundy\n\n");
     sendToAllPly(myStringToChar("end\n"), std::strlen("end\n"));
     start = std::chrono::steady_clock::now();
     if(Client::numberOfPlayers > 1){
@@ -314,6 +317,7 @@ void clockRunGame(){
         }
     else{
         // nowa gra
+        printf("Koniec Gry\n\n");
         sendToAllPly(myStringToChar("win\n"), std::strlen("win\n"));
         registrationAvailable = true; 
         gameRun = false; 
